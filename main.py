@@ -8,6 +8,7 @@ def main():
         send_to="lead@gmail.com",
         lead_name="John Doe",
         lead_position="sales executive",
+        property="Its a House, with a hall, two chambers very spacefull and others, bathroom, kitchen ... everything you can imagine",
         additional_prompt="Mention our new product launch and encourage him to book a demo."
     )
 
