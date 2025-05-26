@@ -26,10 +26,6 @@ def generate_lead_email(send_from: str, send_to: str, lead_name: str, lead_posit
         Do not include any placeholders like [Your Name], [Your Position], or similar—absolutely no placeholders.
         If any additional instructions are provided, follow them carefully.
         Output only the subject and the body of the email in a structured format, exactly like this:
-        {{
-        "subject": "...",
-        "body": "..."
-        }}
         No extra information or explanations.
         """
 
