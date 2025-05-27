@@ -79,5 +79,5 @@ def main_extract_domain(
             print(f" - {email}\n")
         return filtered
     except Exception as e:
-        asyncio.create_task(set_redis_value(f"----- Got Error : {str(e)}\n--------------- Analysis Unfortunately Ended  ---------------"))
+        asyncio.create_task(set_redis_value(f"----- Got Error while extracting domain's emails : {str(e)}"))
         return []

@@ -55,4 +55,4 @@ def generate_lead_email(
         message_text = completion.choices[0].message.parsed
         return message_text
     except Exception as e:
-        asyncio.create_task(set_redis_value(f"----- Got Error : {str(e)}\n--------------- Analysis Unfortunately Ended  ---------------"))
+        asyncio.create_task(set_redis_value(f"----- Got Error while generating lead emails : {str(e)}"))
