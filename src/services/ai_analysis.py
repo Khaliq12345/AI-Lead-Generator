@@ -25,7 +25,6 @@ async def ai_analysis(property_details: str, compose_email_prompt: str, number_o
             await set_redis_value(f"----- Email Composed. Here is it : {compose_email}")
             if compose_email:
                 results.append(compose_email)
-            print(f"- Task Ended: results {results}")
         await set_redis_value(f"----- Progress : {i} / {len(company_domains)} ---> {100*i/len(company_domains)} %  -----")
     await set_redis_value("----- Ending -----")
     await set_redis_value(f"- Processing Task Ended: results {results}")

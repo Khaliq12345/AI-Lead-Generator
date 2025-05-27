@@ -3,7 +3,6 @@ from src.core import config
 from typing import List, Dict
 from urllib.parse import urlparse
 
-
 def extract_domain(url) -> str:
     parsed_url = urlparse(url)
     hostname = (
@@ -61,8 +60,7 @@ def filter_emails(
         if email.get("seniority") == "executive"
     ]
 
-
-# Testing function
+# Main function
 def main_extract_domain(
     domain: str, # ex : https://www.stripe.com/
 ) -> List[Dict]:
