@@ -5,5 +5,10 @@ export default defineNuxtConfig({
   ],
   css: ['~/assets/css/main.css'],
   compatibilityDate: '2025-05-15',
-  devtools: { enabled: true }
+  devtools: { enabled: true },
+  runtimeConfig: {
+    public: {
+      API_BASE_URL: process.env.NUXT_API_BASE_URL
+    },
+  },
 })

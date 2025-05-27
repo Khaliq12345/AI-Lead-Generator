@@ -26,7 +26,7 @@
 
         <div class="flex flex-col sm:flex-row gap-4 pt-6">
           <button
-            @click="startBot"
+            @click="submitForm"
             type="button"
             class="bg-white text-black px-6 py-2 rounded hover:bg-black hover:text-white border border-white transition cursor-pointer"
           >
@@ -35,6 +35,40 @@
         </div>
       </form>
     </div>
+    <UDrawer
+        title=""
+        v-model:open="drawerOpen"
+        :ui="{ header: 'flex items-center justify-between' }"
+    >
+        <template #header>
+            <h2 class="text-highlighted font-semibold"></h2>
+            <div>
+                <button
+                    @click="refreshLog"
+                    type="button"
+                    class="text-white mr-2 px-6 py-2 rounded hover:bg-black hover:text-white border border-white transition cursor-pointer"
+                >
+                    Refresh Log
+                </button>
+                <button
+                    @click="clearLog"
+                    type="button"
+                    class="bg-white text-black px-6 py-2 rounded hover:bg-black hover:text-white border border-white transition cursor-pointer"
+                >
+                    Clear Log
+                </button>
+            </div>
+        </template>
+        <template #body>
+            <div class="p-6 text-white">
+                <h2 class="text-2xl font-bold mb-4">Submitted Data</h2>
+                <p class="mb-2"><strong>Property Details :</strong></p>
+                <p class="mb-4 whitespace-pre-line text-sm text-gray-300">{{ propertyDetails }}</p>
+                <p class="mb-2"><strong>Email Prompt :</strong></p>
+                <p class="whitespace-pre-line text-sm text-gray-300">{{ composeEmailPrompt }}</p>
+            </div>
+        </template>
+    </UDrawer>
   </div>
 </template>
 
@@ -42,14 +76,18 @@
 <script setup lang="ts">
     const propertyDetails= ref('')
     const composeEmailPrompt = ref('')
+    const drawerOpen = ref(false)
 
-    const startBot = () => {
+    const submitForm = () => {
       console.log('Starting bot with configuration:', {
         propertyDetails: propertyDetails.value,
         composeEmailPrompt: composeEmailPrompt.value
       })
-    // Appel API pour déclencher une action
+      drawerOpen.value = true
     }
+
+    const clearLog = () => {}
+    const refreshLog= () => {}
 </script>
 
 
