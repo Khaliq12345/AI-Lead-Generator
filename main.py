@@ -1,19 +1,34 @@
-from src.services.compose_email import generate_lead_email
+from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
 
-def main():
-    print("Hello from ai-lead-generator!")
-    
-    email = generate_lead_email(
-        send_from="client@gmail.com",
-        send_to="lead@gmail.com",
-        lead_name="John Doe",
-        lead_position="sales executive",
-        property="Its a House, with a hall, two chambers very spacefull and others, bathroom, kitchen ... everything you can imagine",
-        additional_prompt="Mention our new product launch and encourage him to book a demo."
-    )
+from src.api.routes.processing import router as processing_router
 
-    print(email.model_dump())
+
+app = FastAPI(
+    title="AI Lead Generator API",
+    description="API with required EndPoints - Structured",
+    version="1.0.0",
+)
+
+# CORS
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+# Routes
+app.include_router(prefix="/api", router=processing_router, tags=["Main Routes"])
 
 
 if __name__ == "__main__":
-    main()
+    import uvicorn
+
+    uvicorn.run(
+        "__main__:app",
+        host="localhost",
+        port=8000,
+        reload=True,
+    )

@@ -1,20 +1,11 @@
 from openai import OpenAI
-from pydantic import BaseModel
 from typing import Optional
 from src.core import config
+from src.models.model import MailResponse 
 import json
 
 # Initialize the OpenAI client with your API key
 client = OpenAI(api_key=config.OPENAI_KEY)
-
-
-# Define the response model
-class MailResponse(BaseModel):
-    subject: str
-    body: str
-    send_from: str
-    send_to: str
-
 
 def generate_lead_email(
     send_from: str,
@@ -57,11 +48,9 @@ def generate_lead_email(
     )
 
     # Try to Parse the response
-
+    message_text = completion.choices[0].message.content
     try:
-        message_text = completion.choices[
-            0
-        ].message.content
+        
         print(f"response : {message_text}")
         if not message_text:
             return None

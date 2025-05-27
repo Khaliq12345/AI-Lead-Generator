@@ -63,27 +63,16 @@ def filter_emails(
 
 
 # Testing function
-def main():
-    DOMAIN = "https://www.stripe.com/"
-
-    print(
-        f"🔍 Recherche d'e-mails sur {extract_domain(DOMAIN)}..."
-    )
-
-    emails = fetch_emails_from_domain(DOMAIN)
-
+def main_extract_domain(
+    domain: str, # ex : https://www.stripe.com/
+) -> List[Dict]:
+    # extract_domain(DOMAIN)
+    emails = fetch_emails_from_domain(domain)
     if not emails:
-        print(
-            "Aucun résultat trouvé ou erreur d'appel."
-        )
-        return
-
+        print("Aucun emails pour le domaine trouvé ou erreur d'appel.")
+        return []
     filtered = filter_emails(emails)
-
     print("\n📧 E-mails filtrés renvoyés :")
     for email in filtered:
-        print(f" - {email}")
-
-
-if __name__ == "__main__":
-    main()
+        print(f" - {email}\n")
+    return filtered
