@@ -1,7 +1,8 @@
-from fastapi import HTTPException
+import asyncio
 from openai import OpenAI
 from src.core import config
 from src.models.model import DomainResponse
+from src.services.redis_services import set_redis_value
 
 # Initialize the OpenAI client with your API key
 client = OpenAI(api_key=config.OPENAI_KEY)
@@ -46,4 +47,5 @@ def generate_company_domains(
             return []
         return message_text.links
     except Exception as e:
-        raise HTTPException(500, detail=str(e))
+        asyncio.create_task(set_redis_value(f"----- Got Error : {str(e)}\n--------------- Analysis Unfortunately Ended  ---------------"))
+        return []

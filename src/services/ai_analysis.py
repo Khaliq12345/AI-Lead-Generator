@@ -1,4 +1,3 @@
-from fastapi import HTTPException
 from src.core import config
 from src.services.get_emails import main_extract_domain
 from src.services.generate_company_domains import generate_company_domains
@@ -24,6 +23,6 @@ async def ai_analysis(property_details: str, compose_email_prompt: str, number_o
                 if compose_email:
                     results.append(compose_email)
             await set_redis_value(f"----- Progress : {i} / {len(company_domains)} ---> {100*i/len(company_domains)} %  -----")
-        await set_redis_value("----- Ending -----\n- Processing Task Ended: results {results}\n--------------- Successfully ended analysis ---------------")
+        await set_redis_value(f"----- Ending -----\n- Processing Task Ended: results {results}\n--------------- Successfully ended analysis ---------------")
     except Exception as e:
-        raise HTTPException(500, detail=str(e))
+        await set_redis_value(f"----- Got Error : {str(e)}\n--------------- Analysis Unfortunaltly Ended  ---------------")

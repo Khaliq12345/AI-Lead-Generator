@@ -1,8 +1,10 @@
-from fastapi import HTTPException
+import asyncio
 import httpx
 from src.core import config
 from typing import List, Dict
 from urllib.parse import urlparse
+
+from src.services.redis_services import set_redis_value
 
 def extract_domain(url) -> str:
     parsed_url = urlparse(url)
@@ -77,4 +79,5 @@ def main_extract_domain(
             print(f" - {email}\n")
         return filtered
     except Exception as e:
-        raise HTTPException(500, detail=str(e))
+        asyncio.create_task(set_redis_value(f"----- Got Error : {str(e)}\n--------------- Analysis Unfortunately Ended  ---------------"))
+        return []

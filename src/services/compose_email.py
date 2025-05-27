@@ -1,8 +1,9 @@
-from fastapi import HTTPException
+import asyncio
 from openai import OpenAI
 from typing import Optional
 from src.core import config
-from src.models.model import MailResponse 
+from src.models.model import MailResponse
+from src.services.redis_services import set_redis_value 
 
 # Initialize the OpenAI client with your API key
 client = OpenAI(api_key=config.OPENAI_KEY)
@@ -54,4 +55,4 @@ def generate_lead_email(
         message_text = completion.choices[0].message.parsed
         return message_text
     except Exception as e:
-        raise HTTPException(500, detail=str(e))
+        asyncio.create_task(set_redis_value(f"----- Got Error : {str(e)}\n--------------- Analysis Unfortunately Ended  ---------------"))
