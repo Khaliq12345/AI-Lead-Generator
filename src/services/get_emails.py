@@ -1,3 +1,4 @@
+from fastapi import HTTPException
 import httpx
 from src.core import config
 from typing import List, Dict
@@ -65,12 +66,15 @@ def main_extract_domain(
     domain: str, # ex : https://www.stripe.com/
 ) -> List[Dict]:
     # extract_domain(DOMAIN)
-    emails = fetch_emails_from_domain(domain)
-    if not emails:
-        print("Aucun emails pour le domaine trouvé ou erreur d'appel.")
-        return []
-    filtered = filter_emails(emails)
-    print("\n📧 E-mails filtrés renvoyés :")
-    for email in filtered:
-        print(f" - {email}\n")
-    return filtered
+    try:
+        emails = fetch_emails_from_domain(domain)
+        if not emails:
+            print("Aucun emails pour le domaine trouvé ou erreur d'appel.")
+            return []
+        filtered = filter_emails(emails)
+        print("\n📧 E-mails filtrés renvoyés :")
+        for email in filtered:
+            print(f" - {email}\n")
+        return filtered
+    except Exception as e:
+        raise HTTPException(500, detail=str(e))

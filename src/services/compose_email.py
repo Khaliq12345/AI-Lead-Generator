@@ -1,3 +1,4 @@
+from fastapi import HTTPException
 from openai import OpenAI
 from typing import Optional
 from src.core import config
@@ -34,20 +35,23 @@ def generate_lead_email(
         prompt += f"\nAdditional context: {additional_prompt}"
 
     # Generate the response
-    completion = client.beta.chat.completions.parse(
-        model="gpt-4o-2024-08-06",
-        temperature=0.2,
-        max_tokens=300,
-        messages=[
-            {"role": "system", "content": prompt},
-            {
-                "role": "user",
-                "content": "Please provide only the subject and body of the email. No more text",
-            },
-        ],
-        response_format=MailResponse
-    )
+    try:
+        completion = client.beta.chat.completions.parse(
+            model="gpt-4o-2024-08-06",
+            temperature=0.2,
+            max_tokens=300,
+            messages=[
+                {"role": "system", "content": prompt},
+                {
+                    "role": "user",
+                    "content": "Please provide only the subject and body of the email. No more text",
+                },
+            ],
+            response_format=MailResponse
+        )
 
-    # Try to Parse the response
-    message_text = completion.choices[0].message.parsed
-    return message_text
+        # Try to Parse the response
+        message_text = completion.choices[0].message.parsed
+        return message_text
+    except Exception as e:
+        raise HTTPException(500, detail=str(e))

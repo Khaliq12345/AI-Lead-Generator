@@ -1,3 +1,4 @@
+from fastapi import HTTPException
 from openai import OpenAI
 from src.core import config
 from src.models.model import DomainResponse
@@ -24,22 +25,25 @@ def generate_company_domains(
     {property_details}
     """.strip()
 
-    # Generate the response
-    completion = client.beta.chat.completions.parse(
-        model="gpt-4o-2024-08-06",
-        temperature=0.2,
-        max_tokens=300,
-        messages=[
-            {"role": "system", "content": prompt},
-            {
-                "role": "user",
-                "content": "Please provide only the company domains. No more text",
-            },
-        ],
-        response_format=DomainResponse
-    )
+    # Generate the 
+    try:
+        completion = client.beta.chat.completions.parse(
+            model="gpt-4o-2024-08-06",
+            temperature=0.2,
+            max_tokens=300,
+            messages=[
+                {"role": "system", "content": prompt},
+                {
+                    "role": "user",
+                    "content": "Please provide only the company domains. No more text",
+                },
+            ],
+            response_format=DomainResponse
+        )
 
-    message_text = completion.choices[0].message.parsed
-    if not message_text:
-        return []
-    return message_text.links
+        message_text = completion.choices[0].message.parsed
+        if not message_text:
+            return []
+        return message_text.links
+    except Exception as e:
+        raise HTTPException(500, detail=str(e))

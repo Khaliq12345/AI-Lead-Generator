@@ -13,7 +13,7 @@ async def get_log() -> str:
         raise HTTPException(500, detail=str(e))
      
 # Clear Logs
-@router.get("/flush-db", response_model=None)
+@router.get("/clear-log", response_model=None)
 async def flush_db() -> str:
     try:
         await flush_redis_db()
