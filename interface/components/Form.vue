@@ -7,17 +7,19 @@
 
       <form class="space-y-6">
         <TextArea
-            v-model="propertyDetails"
-            label="Property Details"
-            placeholder="Enter property details..."
-            :rows="5"
-        />
+          label="Property Details"
+          placeholder="Enter property details..."
+          :rows="5"
+          @on-update-text="(newValue) => propertyDetails = newValue"
+        ></TextArea>
+
         <TextArea
-            v-model="composeEmailPrompt"
             label="Compose Email Prompt"
             placeholder="Enter email prompt..."
             :rows="5"
-        />
+            @on-update-text="(newValue) => composeEmailPrompt = newValue"
+        ></TextArea>
+
         <div class="flex flex-col sm:flex-row gap-4 pt-6">
           <button
             @click="submitForm"
@@ -68,25 +70,36 @@
 
 
 <script setup lang="ts">
-    const propertyDetails= ref('Property Detailssssssss')
-    const composeEmailPrompt = ref('Email Prompttttttt')
-    const drawerOpen = ref(false)
+const propertyDetails= ref('')
+const composeEmailPrompt = ref('')
+const drawerOpen = ref(false)
 
-    const submitForm = () => {
-      console.log('Starting process:', {
-        propertyDetails: propertyDetails.value,
-        composeEmailPrompt: composeEmailPrompt.value
-      })
-      drawerOpen.value = true
-    }
+const submitForm = () => {
+console.log('Starting process:', {
+  propertyDetails: propertyDetails.value,
+  composeEmailPrompt: composeEmailPrompt.value
+})
+drawerOpen.value = true
+}
 
-    const refreshLog= () => {
-        console.log("Refresh Logs...")
-    }
+const refreshLog= () => {
+  console.log("Refresh Logs...")
+}
 
-    const clearLog = () => {
-        console.log("Clear Logs...")
-    }
+const clearLog = () => {
+  console.log("Clear Logs...")
+}
+
+
+
+const { data } = await useFetch('/clear-log/test', {
+  params: {
+    'name': "Khaliq"
+  },
+  headers: {
+
+  }
+})
 </script>
 
 
