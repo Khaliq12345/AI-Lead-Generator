@@ -4,7 +4,7 @@ from typing import List, Dict
 from urllib.parse import urlparse
 
 
-def extract_domain(url):
+def extract_domain(url) -> str:
     parsed_url = urlparse(url)
     hostname = (
         parsed_url.hostname or parsed_url.path
