@@ -1,11 +1,7 @@
-import axios from 'axios'
-
-
-export const clearLogs = async () => {
+export default defineEventHandler(async (event) => {
   const baseUrl = useRuntimeConfig().public.API_BASE_URL as string
-  console.log(baseUrl)
-  return axios.post(`${baseUrl}/clear-logs`, null, {
-    params: {},
-    headers: {},
-  })
-}
+  const url = `${baseUrl}/clear-logs`
+  const data = await $fetch(url)
+
+  return data
+})

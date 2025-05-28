@@ -21,13 +21,7 @@
         ></TextArea>
 
         <div class="flex flex-col sm:flex-row gap-4 pt-6">
-          <button
-            @click="submitForm"
-            type="button"
-            class="bg-white text-black px-6 py-2 rounded hover:bg-black hover:text-white border border-white transition cursor-pointer"
-          >
-            SUBMIT
-          </button>
+          <Button @click="submitForm">SUBMIT</Button>
         </div>
       </form>
     </div>
@@ -39,20 +33,13 @@
         <template #header>
             <h2 class="text-highlighted font-semibold"></h2>
             <div>
-                <button
+                <Button
                     @click="refreshLog"
-                    type="button"
-                    class="text-white mr-2 px-6 py-2 rounded hover:bg-black hover:text-white border border-white transition cursor-pointer"
+                    customClass="bg-[0] text-white mr-2 px-6 py-2 rounded hover:bg-black hover:text-white border border-white transition cursor-pointer"
                 >
                     Refresh Log
-                </button>
-                <button
-                    @click="clearLog"
-                    type="button"
-                    class="bg-white text-black px-6 py-2 rounded hover:bg-black hover:text-white border border-white transition cursor-pointer"
-                >
-                    Clear Log
-                </button>
+                </Button>
+                <Button @click="clearLog">Clear Log</Button>
             </div>
         </template>
         <template #body>
@@ -70,36 +57,37 @@
 
 
 <script setup lang="ts">
-const propertyDetails= ref('')
-const composeEmailPrompt = ref('')
-const drawerOpen = ref(false)
+    const propertyDetails= ref('')
+    const composeEmailPrompt = ref('')
+    const drawerOpen = ref(false)
 
-const submitForm = () => {
-console.log('Starting process:', {
-  propertyDetails: propertyDetails.value,
-  composeEmailPrompt: composeEmailPrompt.value
-})
-drawerOpen.value = true
-}
+    const submitForm = () => {
+        console.log('Starting process:', {
+            propertyDetails: propertyDetails.value,
+            composeEmailPrompt: composeEmailPrompt.value
+        })
+        drawerOpen.value = true
+    }
 
-const refreshLog= () => {
-  console.log("Refresh Logs...")
-}
+    const refreshLog= () => {
+        console.log("Refresh Logs...")
+    }
 
-const clearLog = () => {
-  console.log("Clear Logs...")
-}
+    const clearLog = () => {
+        console.log("Clear Logs...")
+    }
 
+    /* const { data } = await useFetch('/api/hello')
+    console.log(data.value) */
 
+    /* const { data } = await useFetch('/clear-log/test', {
+        params: {
+            'name': "Khaliq"
+        },
+        headers: {
 
-const { data } = await useFetch('/clear-log/test', {
-  params: {
-    'name': "Khaliq"
-  },
-  headers: {
-
-  }
-})
+        }
+    }) */
 </script>
 
 
