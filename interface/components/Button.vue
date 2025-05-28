@@ -18,7 +18,7 @@
         disabled?: boolean
     }>()
 
-    const defaultClass = "bg-white text-black px-6 py-2 rounded hover:bg-black hover:text-white border border-white transition cursor-pointer"
+    const defaultClass = "bg-white text-black px-6 py-2 mr-3 rounded hover:bg-black hover:text-white border border-white transition cursor-pointer"
 
     const computedClass = computed(() => {
         return props.customClass ?? defaultClass
