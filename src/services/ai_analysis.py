@@ -4,6 +4,7 @@ from src.services.generate_company_domains import generate_company_domains
 from src.services.compose_email import generate_lead_email
 from src.models.model import MailResponse
 from src.services.redis_services import set_redis_value
+from src.services.send_mail import send_email_message
 
 
 async def ai_analysis(property_details: str, compose_email_prompt: str, number_of_domains:int = 10):
@@ -22,6 +23,8 @@ async def ai_analysis(property_details: str, compose_email_prompt: str, number_o
                 await set_redis_value(f"----- Email Composed. Here is it : {compose_email}")
                 if compose_email:
                     results.append(compose_email)
+                    res = await send_email_message(content=compose_email.body, send_to=email['email'], subject=compose_email.subject)
+                    await set_redis_value(f"----- Email Sending Status : {res}")
             await set_redis_value(f"----- Progress : {i} / {len(company_domains)} ---> {100*i/len(company_domains)} %  -----")
         await set_redis_value(f"----- Ending -----\n- Processing Task Ended: results {results}\n--------------- Successfully ended analysis ---------------")
     except Exception as e:
