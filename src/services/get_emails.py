@@ -1,8 +1,10 @@
+import asyncio
 import httpx
 from src.core import config
 from typing import List, Dict
 from urllib.parse import urlparse
 
+from src.services.redis_services import set_redis_value
 
 def extract_domain(url) -> str:
     parsed_url = urlparse(url)
@@ -61,29 +63,21 @@ def filter_emails(
         if email.get("seniority") == "executive"
     ]
 
-
-# Testing function
-def main():
-    DOMAIN = "https://www.stripe.com/"
-
-    print(
-        f"🔍 Recherche d'e-mails sur {extract_domain(DOMAIN)}..."
-    )
-
-    emails = fetch_emails_from_domain(DOMAIN)
-
-    if not emails:
-        print(
-            "Aucun résultat trouvé ou erreur d'appel."
-        )
-        return
-
-    filtered = filter_emails(emails)
-
-    print("\n📧 E-mails filtrés renvoyés :")
-    for email in filtered:
-        print(f" - {email}")
-
-
-if __name__ == "__main__":
-    main()
+# Main function
+def main_extract_domain(
+    domain: str, # ex : https://www.stripe.com/
+) -> List[Dict]:
+    # extract_domain(DOMAIN)
+    try:
+        emails = fetch_emails_from_domain(domain)
+        if not emails:
+            print("Aucun emails pour le domaine trouvé ou erreur d'appel.")
+            return []
+        filtered = filter_emails(emails)
+        print("\n📧 E-mails filtrés renvoyés :")
+        for email in filtered:
+            print(f" - {email}\n")
+        return filtered
+    except Exception as e:
+        asyncio.create_task(set_redis_value(f"----- Got Error while extracting domain's emails : {str(e)}"))
+        return []
