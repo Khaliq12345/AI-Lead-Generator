@@ -26,7 +26,8 @@
       </form>
     </div>
     <UDrawer
-        title=""
+        title="Submitted Data Details"
+        description="View and manage submitted property data and email prompts"
         v-model:open="drawerOpen"
         :ui="{ header: 'flex items-center justify-between' }"
     >
