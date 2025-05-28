@@ -25,4 +25,13 @@
     })
 </script>
 
-<style></style>
+<style>
+    .disabled\:bg-primary {
+        &:disabled {
+            background-color: white;
+            &:hover {
+                color: black;
+            }
+        }
+    }
+</style>

@@ -6,22 +6,41 @@
       </h1>
 
       <form class="space-y-6">
-        <TextArea
-          label="Property Details"
-          placeholder="Enter property details..."
-          :rows="5"
-          @on-update-text="(newValue) => propertyDetails = newValue"
-        ></TextArea>
+        <div v-if="errorMsg" class="errorMsg"><strong>{{ errorMsg }}</strong></div>
+        <div v-if="successMsg" class="successMsg"><strong>{{ successMsg }}</strong></div>
+        <ClientOnly>
+            <TextArea
+                label="Property Details"
+                placeholder="Enter property details..."
+                :rows="5"
+                @on-update-text="(newValue) => propertyDetails = newValue"
+            ></TextArea>
+        </ClientOnly>
 
-        <TextArea
-            label="Compose Email Prompt"
-            placeholder="Enter email prompt..."
-            :rows="5"
-            @on-update-text="(newValue) => composeEmailPrompt = newValue"
-        ></TextArea>
+        <ClientOnly>
+            <TextArea
+                label="Compose Email Prompt"
+                placeholder="Enter email prompt..."
+                :rows="5"
+                @on-update-text="(newValue) => composeEmailPrompt = newValue"
+            ></TextArea>
+        </ClientOnly>
 
-        <div class="flex flex-col sm:flex-row gap-4 pt-6">
-          <Button @click="submitForm">SUBMIT</Button>
+        <div
+            v-if="isLoading"
+            class="flex justify-center"
+        >
+            <div class="loader"></div>
+        </div>
+        <div v-else class="flex flex-col sm:flex-row gap-4 pt-6 justify-center">
+            <ClientOnly>
+                <Button
+                    v-bind:disabled="isLoading || !canSubmitForm"
+                    @click="submitForm"
+                >
+                    SUBMIT
+                </Button>
+            </ClientOnly>
         </div>
       </form>
     </div>
@@ -58,25 +77,57 @@
 
 
 <script setup lang="ts">
+    import type { StartProcessing } from '~/interfaces/StartProcessing'
+
     const propertyDetails= ref('')
     const composeEmailPrompt = ref('')
+    const errorMsg = ref('')
+    const successMsg= ref('')
+    const isLoading = ref(false)
     const drawerOpen = ref(false)
+    const canSubmitForm = computed(() => !!propertyDetails.value && !!composeEmailPrompt.value)
 
-    const submitForm = () => {
-        console.log('Starting process:', {
+    const submitForm = async () => {
+        if (!propertyDetails.value || !composeEmailPrompt.value) {
+            errorMsg.value = "Veuillez remplir tous les champs"
+            return
+        }
+        try {
+            isLoading.value = true
+            const { data, error } = await useFetch<StartProcessing>('api/start-processing', {
+                params: {
+                    property_details: propertyDetails.value,
+                    compose_email_prompt: composeEmailPrompt.value,
+                }
+            })
+            if (error.value) {
+                console.error("Erreur lors du démarrage du processus:", error.value)
+                errorMsg.value = "Erreur lors du démarrage du processus"
+            }
+            else if(data.value) {
+                console.log("Processus démarré :", data.value)
+                successMsg.value = data.value.message || ''
+            }
+        }
+        catch (e) {
+            console.error("Une erreur inattendue s'est produite :", e)
+            errorMsg.value = "Une erreur inattendue s'est produite"
+        }
+        finally {
+            isLoading.value = false
+            // drawerOpen.value = true
+        }
+
+        /* console.log('Starting process:', {
             propertyDetails: propertyDetails.value,
             composeEmailPrompt: composeEmailPrompt.value
-        })
-        drawerOpen.value = true
+        }) */
     }
 
     const refreshLog= async () => {
         console.log("Refresh Logs...")
         try {
-            const { data, error } = await useFetch('api/refresh-logs', {
-                params: {},
-                headers: {}
-            })
+            const { data, error } = await useFetch('api/refresh-logs')
             if (error.value) {
                 console.error("Erreur lors du refresh:", error.value)
             } else {
@@ -91,10 +142,7 @@
     const clearLog = async () => {
         console.log("Clear Logs...")
         try {
-            const { data, error } = await useFetch('api/clear-logs', {
-                params: {},
-                headers: {}
-            })
+            const { data, error } = await useFetch('api/clear-logs')
             if (error.value) {
                 console.error("Erreur lors du clear:", error.value)
             } else {
@@ -109,4 +157,33 @@
 
 
 <style>
+    .successMsg {
+        text-align: center;
+        color: green;
+        margin-top: 1rem;
+        margin-bottom: 1rem;
+    }
+    .errorMsg {
+        text-align: center;
+        color: red;
+        margin-top: 1rem;
+        margin-bottom: 1rem;
+    }
+    .loader {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        border: solid 4px #FFF;
+        border-top: 5px solid transparent;
+        animation: spin 1s linear infinite;
+    }
+
+    @keyframes spin {
+        0% {
+            transform: rotate(0deg);
+        }
+        100% {
+            transform: rotate(360deg);
+        }
+    }
 </style>
