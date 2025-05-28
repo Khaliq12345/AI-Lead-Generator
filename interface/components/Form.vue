@@ -117,11 +117,6 @@
             isLoading.value = false
             // drawerOpen.value = true
         }
-
-        /* console.log('Starting process:', {
-            propertyDetails: propertyDetails.value,
-            composeEmailPrompt: composeEmailPrompt.value
-        }) */
     }
 
     const refreshLog= async () => {

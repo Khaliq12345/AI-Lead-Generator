@@ -1,27 +1,77 @@
 <template>
-  <div class="min-h-screen bg-[#f5f5f5] py-10 px-4">
-    <div class="max-w-5xl mx-auto bg-[#eeeeee] rounded-md shadow p-10">
-      <h1 class="text-3xl font-semibold text-center text-white bg-[#5397d6] py-4 rounded-md mb-10">AI Lead Generator</h1>
+  <div class="min-h-screen bg-black py-10 px-4">
+    <div class="max-w-5xl mx-auto bg-[#1c1c1e] rounded-md shadow-lg p-10">
+      <h1 class="text-3xl font-semibold text-center text-black bg-white bg-opacity-10 py-4 rounded-md mb-10">
+        AI Lead Generator
+      </h1>
 
       <form class="space-y-6">
-        <div>
-          <label class="block text-base text-gray-800 mb-1"><strong>Property Details</strong></label>
-          <textarea type="text" rows="5" v-model="propertyDetails" class="w-full px-4 py-2 border border-gray-400 rounded text-black" />
+        <div v-if="errorMsg" class="errorMsg"><strong>{{ errorMsg }}</strong></div>
+        <div v-if="successMsg" class="successMsg"><strong>{{ successMsg }}</strong></div>
+        <ClientOnly>
+            <TextArea
+                label="Property Details"
+                placeholder="Enter property details..."
+                :rows="5"
+                @on-update-text="(newValue) => propertyDetails = newValue"
+            ></TextArea>
+        </ClientOnly>
+
+        <ClientOnly>
+            <TextArea
+                label="Compose Email Prompt"
+                placeholder="Enter email prompt..."
+                :rows="5"
+                @on-update-text="(newValue) => composeEmailPrompt = newValue"
+            ></TextArea>
+        </ClientOnly>
+
+        <div
+            v-if="isLoading"
+            class="flex justify-center"
+        >
+            <div class="loader"></div>
         </div>
-        <div>
-          <label class="block text-base text-gray-800 mb-1"><strong>Compose Email Prompt</strong></label>
-          <textarea type="text" rows="5" v-model="composeEmailPrompt" class="w-full px-4 py-2 border border-gray-400 rounded text-black" />
-        </div>
-        <div class="flex flex-col sm:flex-row gap-4 pt-6">
-          <button
-            @click="startBot"
-            type="button" class="bg-[#4ba3e3] text-white px-6 py-2 rounded hover:bg-[#368acc] transition cursor-pointer"
-          >
-            SUBMIT
-          </button>
+        <div v-else class="flex flex-col sm:flex-row gap-4 pt-6 justify-center">
+            <ClientOnly>
+                <Button
+                    v-bind:disabled="isLoading || !canSubmitForm"
+                    @click="submitForm"
+                >
+                    SUBMIT
+                </Button>
+            </ClientOnly>
         </div>
       </form>
     </div>
+    <UDrawer
+        title="Submitted Data Details"
+        description="View and manage submitted property data and email prompts"
+        v-model:open="drawerOpen"
+        :ui="{ header: 'flex items-center justify-between' }"
+    >
+        <template #header>
+            <h2 class="text-highlighted font-semibold"></h2>
+            <div>
+                <Button
+                    @click="refreshLog"
+                    customClass="bg-[0] text-white mr-2 px-6 py-2 rounded hover:bg-black hover:text-white border border-white transition cursor-pointer"
+                >
+                    Refresh Log
+                </Button>
+                <Button @click="clearLog">Clear Log</Button>
+            </div>
+        </template>
+        <template #body>
+            <div class="p-6 text-white">
+                <h2 class="text-2xl font-bold mb-4">Submitted Data</h2>
+                <p class="mb-2"><strong>Property Details :</strong></p>
+                <p class="mb-4 whitespace-pre-line text-sm text-gray-300">{{ propertyDetails }}</p>
+                <p class="mb-2"><strong>Email Prompt :</strong></p>
+                <p class="whitespace-pre-line text-sm text-gray-300">{{ composeEmailPrompt }}</p>
+            </div>
+        </template>
+    </UDrawer>
   </div>
 </template>
 
@@ -29,16 +79,58 @@
 <script setup lang="ts">
     const propertyDetails= ref('')
     const composeEmailPrompt = ref('')
+    const errorMsg = ref('')
+    const successMsg= ref('')
+    const isLoading = ref(false)
+    const drawerOpen = ref(false)
+    const canSubmitForm = computed(() => !!propertyDetails.value && !!composeEmailPrompt.value)
 
-    const startBot = () => {
-      console.log('Starting bot with configuration:', {
-        propertyDetails: propertyDetails.value,
-        composeEmailPrompt: composeEmailPrompt.value
-      })
-    // Appel API pour déclencher une action
+    const submitForm = async () => {
+        console.log('Starting process:', {
+            propertyDetails: propertyDetails.value,
+            composeEmailPrompt: composeEmailPrompt.value
+        })
+        drawerOpen.value = true
+    }
+
+    const refreshLog= async () => {
+        console.log("Refresh Logs...")
+    }
+
+    const clearLog = async () => {
+        console.log("Clear Logs...")
     }
 </script>
 
 
 <style>
+    .successMsg {
+        text-align: center;
+        color: green;
+        margin-top: 1rem;
+        margin-bottom: 1rem;
+    }
+    .errorMsg {
+        text-align: center;
+        color: red;
+        margin-top: 1rem;
+        margin-bottom: 1rem;
+    }
+    .loader {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        border: solid 4px #FFF;
+        border-top: 5px solid transparent;
+        animation: spin 1s linear infinite;
+    }
+
+    @keyframes spin {
+        0% {
+            transform: rotate(0deg);
+        }
+        100% {
+            transform: rotate(360deg);
+        }
+    }
 </style>
