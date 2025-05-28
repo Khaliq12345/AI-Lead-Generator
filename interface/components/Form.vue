@@ -101,11 +101,9 @@
                 }
             })
             if (error.value) {
-                console.error("Erreur lors du démarrage du processus:", error.value)
                 errorMsg.value = "Erreur lors du démarrage du processus"
             }
             else if(data.value) {
-                console.log("Processus démarré :", data.value)
                 successMsg.value = data.value.message || ''
             }
         }
