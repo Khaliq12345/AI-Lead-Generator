@@ -69,25 +69,41 @@
         drawerOpen.value = true
     }
 
-    const refreshLog= () => {
+    const refreshLog= async () => {
         console.log("Refresh Logs...")
-    }
-
-    const clearLog = () => {
-        console.log("Clear Logs...")
-    }
-
-    /* const { data } = await useFetch('/api/hello')
-    console.log(data.value) */
-
-    /* const { data } = await useFetch('/clear-log/test', {
-        params: {
-            'name': "Khaliq"
-        },
-        headers: {
-
+        try {
+            const { data, error } = await useFetch('api/refresh-logs', {
+                params: {},
+                headers: {}
+            })
+            if (error.value) {
+                console.error("Erreur lors du refresh:", error.value)
+            } else {
+                console.log("Logs rafraîchis :", data.value)
+            }
         }
-    }) */
+        catch (e) {
+            console.error("Une erreur inattendue s'est produite :", e)
+        }
+    }
+
+    const clearLog = async () => {
+        console.log("Clear Logs...")
+        try {
+            const { data, error } = await useFetch('api/clear-logs', {
+                params: {},
+                headers: {}
+            })
+            if (error.value) {
+                console.error("Erreur lors du clear:", error.value)
+            } else {
+                console.log("Logs supprimés :", data.value)
+            }
+        }
+        catch (e) {
+            console.error("Une erreur inattendue s'est produite :", e)
+        }
+    }
 </script>
 
 
