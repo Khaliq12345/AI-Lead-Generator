@@ -52,12 +52,12 @@
             <h2 class="text-highlighted font-semibold"></h2>
             <div>
                 <Button
-                    @click="refreshLog"
+                    @click="refreshLogs"
                     customClass="bg-[0] text-white px-6 py-2 mr-3 rounded hover:bg-black hover:text-white border border-white transition cursor-pointer"
                 >
-                    Refresh Log
+                    Refresh Logs
                 </Button>
-                <Button @click="clearLog">Clear Log</Button>
+                <Button @click="clearLogs">Clear Logs</Button>
                 <UButton color="neutral" variant="ghost" icon="i-lucide-x" class="py-2 mt-[-15px] cursor-pointer" @click="drawerOpen = false" />
             </div>
         </template>
@@ -116,7 +116,7 @@
         }
     }
 
-    const refreshLog= async () => {
+    const refreshLogs = async () => {
         try {
             const { data, error } = await useFetch('api/refresh-logs')
             if (error.value) {
@@ -130,18 +130,13 @@
         }
     }
 
-    const clearLog = async () => {
+    const clearLogs = async () => {
         try {
             const { data, error } = await useFetch<string>('api/clear-logs')
             if (error.value) {
                 console.error("Erreur lors du clear:", error.value)
             } else if (data.value) {
-                const { data: logsData, error: logsError } = await useFetch<string>('api/get-logs')
-                if (logsError.value) {
-                    console.error("Impossible de récupérer les logs", logsError.value)
-                } else if (logsData.value) {
-                    logs.value = logsData.value
-                }
+                logs.value = ""
                 successMsg.value = "Logs supprimés avec succès"
             }
         }
