@@ -1,10 +1,10 @@
 export default defineEventHandler(async (event) => {
-  const query = getQuery(event)
-  const baseUrl = useRuntimeConfig().public.API_BASE_URL as string
-  const url = `${baseUrl}/api/clear-log`
+  const baseUrl = useRuntimeConfig().public.API_BASE_URL as string;
+  const url = `${baseUrl}/api/clear-log`;
   const data = await $fetch(url, {
-    method: 'GET'
-  })
+    method: "GET",
+  });
 
-  return data
-})
+  return data;
+});
+
