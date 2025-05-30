@@ -5,7 +5,7 @@ from src.services.generate_company_domains import generate_company_domains
 from src.services.compose_email import generate_lead_email
 from src.models.model import MailResponse
 from src.services.redis_services import set_redis_value
-from src.services.send_mail import send_email_message
+from src.services.send_mail import send_email_draft
 
 
 async def ai_analysis(
@@ -47,7 +47,7 @@ async def ai_analysis(
                 )
                 if compose_email:
                     results.append(compose_email)
-                    res = await send_email_message(
+                    res = await send_email_draft(
                         content=compose_email.body,
                         send_to=email["email"],
                         subject=compose_email.subject,
