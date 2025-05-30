@@ -1,14 +1,17 @@
 import smtplib
 import ssl
 from email.message import EmailMessage
-from src.core.config import CLIENT_EMAIL_APP_PASSWORD, CLIENT_EMAIL
+from src.core.config import CLIENT_EMAIL_APP_PASSWORD, CLIENT_EMAIL, TEST_EMAIL
 
-async def send_email_message(subject: str, content: str, send_to: str) -> dict:
-    sender_email = str(CLIENT_EMAIL)
-    app_password = str(CLIENT_EMAIL_APP_PASSWORD) 
+
+async def send_email_message(
+    subject: str, content: str, send_to: str, test: bool = True
+) -> dict:
+    sender_email = CLIENT_EMAIL
+    app_password = CLIENT_EMAIL_APP_PASSWORD
     message = EmailMessage()
     message["From"] = sender_email
-    message["To"] = send_to
+    message["To"] = TEST_EMAIL if test else send_to
     message["Subject"] = subject
     message.set_content(content)
     try:

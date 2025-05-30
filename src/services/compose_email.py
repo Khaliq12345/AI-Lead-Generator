@@ -3,10 +3,11 @@ from openai import OpenAI
 from typing import Optional
 from src.core import config
 from src.models.model import MailResponse
-from src.services.redis_services import set_redis_value 
+from src.services.redis_services import set_redis_value
 
 # Initialize the OpenAI client with your API key
 client = OpenAI(api_key=config.OPENAI_KEY)
+
 
 def generate_lead_email(
     send_from: str,
@@ -48,11 +49,16 @@ def generate_lead_email(
                     "content": "Please provide only the subject and body of the email. No more text",
                 },
             ],
-            response_format=MailResponse
+            response_format=MailResponse,
         )
 
         # Try to Parse the response
         message_text = completion.choices[0].message.parsed
         return message_text
     except Exception as e:
-        asyncio.create_task(set_redis_value(f"----- Got Error while generating lead emails : {str(e)}"))
+        asyncio.create_task(
+            set_redis_value(
+                f"----- Got Error while generating lead emails : {str(e)}"
+            )
+        )
+
