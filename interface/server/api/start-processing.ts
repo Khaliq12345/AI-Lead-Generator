@@ -3,20 +3,29 @@ export default defineEventHandler(async (event) => {
   const property_details = query.property_details;
   const email_prompt = query.compose_email_prompt;
   const numberOfDomains = query.number_of_domains;
-  const test = query.test;
-  console.log(property_details, email_prompt, numberOfDomains, test)
+  
+  try {
   const baseUrl = useRuntimeConfig().public.API_BASE_URL as string;
-  const url = `${baseUrl}/api/start-processing`;
-  // const data = await $fetch(url, {
-  //   method: "GET",
-  //   params: {
-  //     property_details: property_details,
-  //     compose_email_prompt: email_prompt,
-  //     number_of_domains: numberOfDomains,
-  //     test: test
-  //   },
-  // });
+     console.log(property_details, email_prompt, numberOfDomains, baseUrl, event.path)
+    const response = await $fetch(event.path, {
+      baseURL: baseUrl,
+      method: "GET",
+    params: {
+      property_details: property_details,
+      compose_email_prompt: email_prompt,
+      number_of_domains: numberOfDomains,
+    },
+    });
 
-  const data = await $fetch("https://jsonplaceholder.typicode.com/todos/1")
-  return data;
+    console.log(response);
+
+    return response; // 
+
+  } catch (err: any) {
+    console.error("Erreur lors de l'appel à l'API distante :", err?.message);
+    return createError({
+      statusCode: err?.response?.status || 500,
+      statusMessage: err?.response?.data?.message || "Erreur serveur",
+    });
+  }
 });

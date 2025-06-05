@@ -17,4 +17,5 @@ async def get_redis_values() -> str:
 
 # Flush the current Redis DB
 async def flush_redis_db() -> None:
+    await redis_client.set(log_key, "", ex=3600)
     await redis_client.flushdb()

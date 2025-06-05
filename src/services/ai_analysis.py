@@ -55,7 +55,7 @@ async def ai_analysis(
                                 f"""Email - {compose_email.send_to}\n--------------------------------------------\n\n# Body\n\n**Subject** - {compose_email.subject}\n\n{compose_email.body}"""
                             )
             await set_redis_value(
-                f"----- Progress : {i} / {len(company_domains)} ---> {100 * i / len(company_domains)} %  -----"
+                f"----- Progress : {i+1} / {len(company_domains)} ---> {100 * (i+1) / len(company_domains)} %  -----"
             )
         shutil.make_archive(f"{folder_path}/mails", "zip", folder_path)
         await set_redis_value("----- Ending -----\n- Processing Task Ended")
