@@ -7,9 +7,9 @@ from src.services.redis_services import set_redis_value
 # Initialize the OpenAI client with your API key
 client = OpenAI(api_key=config.OPENAI_KEY)
 
+
 def generate_company_domains(
-    property_details: str,
-    number_of_domains: int
+    property_details: str, number_of_domains: int
 ) -> list[str]:
     # Construct the prompt
     prompt = f"""
@@ -26,7 +26,7 @@ def generate_company_domains(
     {property_details}
     """.strip()
 
-    # Generate the 
+    # Generate the
     try:
         completion = client.beta.chat.completions.parse(
             model="gpt-4o-2024-08-06",
@@ -39,7 +39,7 @@ def generate_company_domains(
                     "content": "Please provide only the company domains. No more text",
                 },
             ],
-            response_format=DomainResponse
+            response_format=DomainResponse,
         )
 
         message_text = completion.choices[0].message.parsed
@@ -47,5 +47,9 @@ def generate_company_domains(
             return []
         return message_text.links
     except Exception as e:
-        asyncio.create_task(set_redis_value(f"----- Got Error while generating company domains : {str(e)}"))
+        asyncio.create_task(
+            set_redis_value(
+                f"----- Got Error while generating company domains : {str(e)}"
+            )
+        )
         return []

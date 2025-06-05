@@ -6,11 +6,10 @@ from urllib.parse import urlparse
 
 from src.services.redis_services import set_redis_value
 
+
 def extract_domain(url) -> str:
     parsed_url = urlparse(url)
-    hostname = (
-        parsed_url.hostname or parsed_url.path
-    )
+    hostname = parsed_url.hostname or parsed_url.path
     if hostname.startswith("www."):
         hostname = hostname[4:]
     return hostname
@@ -27,14 +26,10 @@ def fetch_emails_from_domain(
     }
 
     try:
-        response = httpx.get(
-            url, params=params, timeout=10
-        )
+        response = httpx.get(url, params=params, timeout=10)
         response.raise_for_status()
         data = response.json()
-        return data.get("data", {}).get(
-            "emails", []
-        )
+        return data.get("data", {}).get("emails", [])
     except httpx.HTTPError as e:
         print(f"Erreur lors de la requête : {e}")
         return []
@@ -51,21 +46,18 @@ def filter_emails(
             "first_name": email.get("first_name"),
             "last_name": email.get("last_name"),
             "position": email.get("position"),
-            "position_raw": email.get(
-                "position_raw"
-            ),
+            "position_raw": email.get("position_raw"),
             "seniority": email.get("seniority"),
-            "phone_number": email.get(
-                "phone_number"
-            ),
+            "phone_number": email.get("phone_number"),
         }
         for email in emails
         if email.get("seniority") == "executive"
     ]
 
+
 # Main function
 def main_extract_domain(
-    domain: str, # ex : https://www.stripe.com/
+    domain: str,  # ex : https://www.stripe.com/
 ) -> List[Dict]:
     # extract_domain(DOMAIN)
     try:
@@ -79,5 +71,10 @@ def main_extract_domain(
             print(f" - {email}\n")
         return filtered
     except Exception as e:
-        asyncio.create_task(set_redis_value(f"----- Got Error while extracting domain's emails : {str(e)}"))
+        asyncio.create_task(
+            set_redis_value(
+                f"----- Got Error while extracting domain's emails : {str(e)}"
+            )
+        )
         return []
+
