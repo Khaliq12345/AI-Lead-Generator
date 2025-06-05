@@ -1,5 +1,5 @@
 <template>
     <main>
-        <Form />
+        <Form></Form>
     </main>
 </template>
