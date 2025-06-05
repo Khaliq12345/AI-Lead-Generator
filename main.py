@@ -1,7 +1,9 @@
+import datetime
+from pathlib import Path
 from src.services import (
     # generate_company_domains,
     # get_emails,
-    # compose_email,
+    compose_email,
     ai_analysis,
     # send_mail,
 )
@@ -22,10 +24,23 @@ Asking Price: $10,750,000. Find me the most likely buyer for the above and attac
 
 if __name__ == "__main__":
     print("Hello world!")
-    send_to = "kiberkhaliq@gmail.com"
-    lead_to = "Khaliq"
-    lead_position = "Software Eng."
-    property = property_info
-
-    # asyncio.run(ai_analysis.ai_analysis(property_info, number_of_domains=2))
     start_app()
+    # send_to = "kiberkhaliq@gmail.com"
+    # lead_to = "Khaliq"
+    # lead_position = "Software Eng."
+    # property = property_info
+    #
+    # output_folder = asyncio.run(
+    #     ai_analysis.ai_analysis(
+    #         test=True, property_details=property_info, number_of_domains=2
+    #     )
+    # )
+    # print(f"Output - {output_folder}")
+    # # start_app()
+    # mail = compose_email.generate_lead_email(
+    #     send_to="test@gmail.com",
+    #     send_from="khaliqsalawoudeen@gmail.com",
+    #     lead_name="Khaliq",
+    #     lead_position=lead_position,
+    #     property=property,
+    # )

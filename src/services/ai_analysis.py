@@ -1,21 +1,24 @@
+import shutil
+from pathlib import Path
+import datetime
 from typing import Optional
 from src.core import config
 from src.services.get_emails import main_extract_domain
 from src.services.generate_company_domains import generate_company_domains
 from src.services.compose_email import generate_lead_email
-from src.models.model import MailResponse
 from src.services.redis_services import set_redis_value
-from src.services.send_mail import send_email_draft
 
 
 async def ai_analysis(
-    test: bool,
     property_details: str,
     compose_email_prompt: Optional[str] = None,
     number_of_domains: int = 10,
-):
+) -> str:
+    Path("./outputs/").mkdir(exist_ok=True)
+    folder = int(datetime.datetime.now().timestamp())
+    folder_path = Path(f"./outputs/{folder}")
+    folder_path.mkdir(exist_ok=True)
     try:
-        results: list[MailResponse] = []
         await set_redis_value(
             "- Strating Analysis ... \n- Trying to get Company domains from provided property_details ..."
         )
@@ -46,21 +49,18 @@ async def ai_analysis(
                     additional_prompt=compose_email_prompt,
                 )
                 if compose_email:
-                    results.append(compose_email)
-                    res = await send_email_draft(
-                        content=compose_email.body,
-                        send_to=email["email"],
-                        subject=compose_email.subject,
-                        test=test,
-                    )
-                    await set_redis_value(f"----- Email Sending Status : {res}")
+                    with open(f"{folder_path}/{i}_{j}_mail.md", "w") as f:
+                        if compose_email:
+                            f.write(
+                                f"""Email - {compose_email.send_to}\n--------------------------------------------\n\n# Body\n\n**Subject** - {compose_email.subject}\n\n{compose_email.body}"""
+                            )
             await set_redis_value(
                 f"----- Progress : {i} / {len(company_domains)} ---> {100 * i / len(company_domains)} %  -----"
             )
-        await set_redis_value(
-            f"----- Ending -----\n- Processing Task Ended: results {results}\n--------------- Successfully ended analysis ---------------"
-        )
+        shutil.make_archive(f"{folder_path}/mails", "zip", folder_path)
+        await set_redis_value("----- Ending -----\n- Processing Task Ended")
     except Exception as e:
         await set_redis_value(
             f"----- Got Error : {str(e)}\n--------------- Analysis Unfortunately Ended  ---------------"
         )
+    return f"{folder_path}/mails.zip"

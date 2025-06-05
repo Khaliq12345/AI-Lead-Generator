@@ -12,13 +12,11 @@ async def start_processing(
     property_details: str,
     compose_email_prompt: Optional[str] = None,
     number_of_domains: int = 10,
-    test: bool = True,
 ) -> dict:
     try:
         # Set Backgroung Processing
         background_tasks.add_task(
             ai_analysis,
-            test,
             property_details,
             compose_email_prompt,
             number_of_domains,
@@ -29,4 +27,3 @@ async def start_processing(
         }
     except Exception as e:
         raise HTTPException(500, detail=str(e))
-
