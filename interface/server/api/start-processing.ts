@@ -7,17 +7,15 @@ export default defineEventHandler(async (event) => {
   try {
   const baseUrl = useRuntimeConfig().public.API_BASE_URL as string;
      console.log(property_details, email_prompt, numberOfDomains, baseUrl, event.path)
-    const response = await $fetch(event.path, {
-      baseURL: baseUrl,
-      method: "GET",
-    params: {
-      property_details: property_details,
-      compose_email_prompt: email_prompt,
-      number_of_domains: numberOfDomains,
-    },
-    });
-
-    console.log(response);
+      const response = await $fetch(event.path, {
+        baseURL: baseUrl,
+        method: "POST",
+        params: {
+          property_details: property_details,
+          compose_email_prompt: email_prompt,
+          number_of_domains: numberOfDomains,
+        },
+      });
 
     return response; // 
 

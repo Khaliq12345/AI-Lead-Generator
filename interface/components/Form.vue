@@ -32,13 +32,19 @@
             </Button>
           </div>
         </form>
+
         <!-- Logs Drawer Button -->
-        <div class="flex justify-end">
-            <Button @click="drawerOpen = true" :disabled="drawerOpen">
+        <div class="flex justify-center p-5">
+            <a :href="outputFile" download>Download</a>
+
+            <!-- <UButton label="Download" v-if="outputFile" @click="downloadFile()"></UButton> -->
+
+            <!-- <Button @click="drawerOpen = true" :disabled="drawerOpen">
               <UIcon name="i-heroicons-bars-3-bottom-left-20-solid" class="mr-3 text-xl" />
               <span class="ml-3 text-lg font-semibold text-center">Logs</span>
-            </Button>
-          </div>
+            </Button> -->
+
+        </div>
     </div>
     
 
@@ -87,6 +93,8 @@ const numberOfDomains = ref(10)
 
 const toast = useToast()
 
+const outputFile = ref("")
+
 function showSuccessToast(title: any, desc: any) {
   toast.add({
     title: title,
@@ -124,12 +132,12 @@ async function submitForm() {
         },
       },
     );
-    showSuccessToast("Success", "AI lead generation started")
+    console.log('Response', data)
+    showSuccessToast("Success", "AI lead generation done!")
   } catch (e) {
     console.error("Une erreur inattendue s'est produite :", e);
     showErrorToast()
-  } finally {
-    isLoading.value = false;
+    isLoading.value = false
   }
 };
 
@@ -151,8 +159,9 @@ const clearLogs = async () => {
     await getLogs()
   }
 }
+
 const getLogs = async () => {
-   if (isLoading.value == true) {
+  if (isLoading.value == true) {
    return 
   }
   try {
@@ -173,6 +182,32 @@ const getLogs = async () => {
 
 }
 
+const checkStatus = async () => {
+  try {
+
+    const response = await $fetch('/api/check-status', {
+      method: 'GET',
+    }) as any
+    console.log("Status - ", response.status)
+    if (response.status === 'running') {
+      isLoading.value = true
+    } else if (response.status === "success") {
+      outputFile.value = response.folder
+      isLoading.value = false
+    } 
+    else {
+      isLoading.value = false
+    }
+
+  } catch (error) {
+    console.error('Erreur de requete:', error);
+  }
+}
+
+
+onMounted(() => {
+  setInterval(checkStatus, 5000);
+});
 </script>
 
 <style>
