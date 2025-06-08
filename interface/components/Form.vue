@@ -139,7 +139,6 @@ async function submitForm() {
       params: {
         property_details: propertyDetails.value,
         compose_email_prompt: composeEmailPrompt.value,
-        test: dev.value,
         number_of_domains: numberOfDomains.value,
       },
     });
