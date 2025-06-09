@@ -16,6 +16,7 @@ def generate_lead_email(
     lead_position: str,
     property: str,
     additional_prompt: Optional[str] = None,
+    base64_string: str = "",
 ) -> MailResponse | None:
     # Construct the prompt
     prompt = f"""
@@ -46,7 +47,15 @@ def generate_lead_email(
                 {"role": "system", "content": prompt},
                 {
                     "role": "user",
-                    "content": "Please provide only the subject and body of the email. No more text",
+                    "content": [
+                        {
+                            "type": "file",
+                            "file": {
+                                "filename": "input.pdf",
+                                "file_data": f"data:application/pdf;base64,{base64_string}",
+                            },
+                        }
+                    ],
                 },
             ],
             response_format=MailResponse,
@@ -61,4 +70,3 @@ def generate_lead_email(
                 f"----- Got Error while generating lead emails : {str(e)}"
             )
         )
-

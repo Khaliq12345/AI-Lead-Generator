@@ -36,6 +36,7 @@ async def ai_analysis(
     property_details: str,
     compose_email_prompt: Optional[str] = None,
     number_of_domains: int = 10,
+    base64_string: str = "",
 ) -> None:
     output_folder = "./interface/public/outputs"
     Path(output_folder).mkdir(exist_ok=True)
@@ -73,12 +74,19 @@ async def ai_analysis(
                     lead_position=email["position"],
                     property=property_details,
                     additional_prompt=compose_email_prompt,
+                    base64_string=base64_string,
                 )
                 if compose_email:
                     with open(f"{absolute_path}/{i}_{j}_mail.md", "w") as f:
+                        top_message = (
+                            f"Name - {email['first_name']} {email['last_name']}"
+                            f"\nEmail - {compose_email.send_to}\nDomain - {company_domain}\n"
+                            f"Position - {email['position']}"
+                        )
                         if compose_email:
                             f.write(
-                                f"""Email - {compose_email.send_to}\n--------------------------------------------\n\n# Body\n\n**Subject** - {compose_email.subject}\n\n{compose_email.body}"""
+                                f"{top_message}\n--------------------------------------------\n\n"
+                                f"# Body\n\n**Subject** - {compose_email.subject}\n\n{compose_email.body}"
                             )
             await set_redis_value(
                 f"----- Progress : {i + 1} / {len(company_domains)} ---> {100 * (i + 1) / len(company_domains)} %  -----"
