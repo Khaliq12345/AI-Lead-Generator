@@ -5,48 +5,57 @@
         AI Lead Generator
       </h1>
 
-        <form @submit.prevent class="space-y-6">
-          <div v-if="errorMsg" class="errorMsg">
-            <strong>{{ errorMsg }}</strong>
+      <form @submit.prevent class="space-y-6">
+        <div v-if="errorMsg" class="errorMsg">
+          <strong>{{ errorMsg }}</strong>
+        </div>
+        <div v-if="successMsg" class="successMsg">
+          <strong>{{ successMsg }}</strong>
+        </div>
+        <TextArea label="Property Details" placeholder="Enter property details..." :rows="5"
+          @on-update-text="(newValue) => (propertyDetails = newValue)"></TextArea>
+
+        <!-- Files Input -->
+        <div class="w-full text-center">
+          <UInput class="w-full" type="file" placeholder="Additional Files" accept=".pdf" multiple
+            icon="i-heroicons-document-duplicate" @change="handleFileChange" />
+          <div class="my-2 font-bold text-white-800" v-if="selectedFiles">
+            {{ selectedFiles.length }} File(s) Selected !
           </div>
-          <div v-if="successMsg" class="successMsg">
-            <strong>{{ successMsg }}</strong>
-          </div>
-          <TextArea label="Property Details" placeholder="Enter property details..." :rows="5"
-            @on-update-text="(newValue) => (propertyDetails = newValue)"></TextArea>
+        </div>
 
-          <TextArea label="Compose Email Prompt" placeholder="Enter email prompt..." :rows="5"
-            @on-update-text="(newValue) => (composeEmailPrompt = newValue)"></TextArea>
+        <TextArea label="Compose Email Prompt" placeholder="Enter email prompt..." :rows="5"
+          @on-update-text="(newValue) => (composeEmailPrompt = newValue)"></TextArea>
 
-          <label id="domains-number">Domains: </label>
-          <UInputNumber placeholder="Number of companies" id="domains-number" v-model="numberOfDomains" />
+        <label id="domains-number">Domains: </label>
+        <UInputNumber placeholder="Number of companies" id="domains-number" v-model="numberOfDomains" />
 
-          <UCheckbox v-model="dev" label="Test run" />
+        <UCheckbox v-model="dev" label="Test run" />
 
-          <div v-if="isLoading" class="flex justify-center">
-            <div class="loader"></div>
-          </div>
-          <div v-else class="flex flex-col sm:flex-row gap-4 pt-6 justify-center">
-            <Button @click="submitForm">
-              SUBMIT
-            </Button>
-          </div>
-        </form>
+        <div v-if="isLoading" class="flex justify-center">
+          <div class="loader"></div>
+        </div>
+        <div v-else class="flex flex-col sm:flex-row gap-4 pt-6 justify-center">
+          <Button @click="submitForm">
+            SUBMIT
+          </Button>
+        </div>
+      </form>
 
-        <!-- Logs Drawer Button -->
-        <div class="flex justify-center p-5">
-            <a :href="outputFile" download>Download</a>
+      <!-- Logs Drawer Button -->
+      <div class="flex justify-center p-5">
+        <a :href="outputFile" download>Download</a>
 
-            <!-- <UButton label="Download" v-if="outputFile" @click="downloadFile()"></UButton> -->
+        <!-- <UButton label="Download" v-if="outputFile" @click="downloadFile()"></UButton> -->
 
-            <!-- <Button @click="drawerOpen = true" :disabled="drawerOpen">
+        <!-- <Button @click="drawerOpen = true" :disabled="drawerOpen">
               <UIcon name="i-heroicons-bars-3-bottom-left-20-solid" class="mr-3 text-xl" />
               <span class="ml-3 text-lg font-semibold text-center">Logs</span>
             </Button> -->
 
-        </div>
+      </div>
     </div>
-    
+
 
     <!-- Logging -->
     <UDrawer title="Submitted Data Details" description="View and manage submitted property data and email prompts"
@@ -68,9 +77,10 @@
       </template>
       <template #body>
         <div v-if="isLoading" class="flex justify-center">
-            <div class="loader"></div>
-          </div>
-          <div v-else class="p-6 text-white  font-mono break-words whitespace-pre-wrap">{{ logs.length == 0 ? "Nothing to show !" : logs }}</div>
+          <div class="loader"></div>
+        </div>
+        <div v-else class="p-6 text-white  font-mono break-words whitespace-pre-wrap">
+          {{ logs.length == 0 ? "Nothing to show!" : logs }}</div>
       </template>
     </UDrawer>
   </div>
@@ -116,7 +126,7 @@ async function submitForm() {
     return;
   }
   if (isLoading.value == true) {
-   return 
+    return
   }
   try {
     isLoading.value = true;
@@ -128,7 +138,8 @@ async function submitForm() {
           property_details: propertyDetails.value,
           compose_email_prompt: composeEmailPrompt.value,
           test: dev.value,
-          number_of_domains: numberOfDomains.value
+          number_of_domains: numberOfDomains.value,
+          docs: fileByteCodes.value
         },
       },
     );
@@ -143,7 +154,7 @@ async function submitForm() {
 
 const clearLogs = async () => {
   if (isLoading.value == true) {
-   return 
+    return
   }
   try {
     isLoading.value = true
@@ -154,7 +165,7 @@ const clearLogs = async () => {
 
   } catch (error) {
     console.error('Erreur de requete:', error);
-  } finally{
+  } finally {
     isLoading.value = false
     await getLogs()
   }
@@ -162,7 +173,7 @@ const clearLogs = async () => {
 
 const getLogs = async () => {
   if (isLoading.value == true) {
-   return 
+    return
   }
   try {
     isLoading.value = true
@@ -176,7 +187,7 @@ const getLogs = async () => {
 
   } catch (error) {
     console.error('Erreur de requete:', error);
-  }  finally{
+  } finally {
     isLoading.value = false
   }
 
@@ -194,7 +205,7 @@ const checkStatus = async () => {
     } else if (response.status === "success") {
       outputFile.value = response.folder
       isLoading.value = false
-    } 
+    }
     else {
       isLoading.value = false
     }
@@ -204,10 +215,36 @@ const checkStatus = async () => {
   }
 }
 
+// Files
+const selectedFiles = ref<FileList | null>(null)
+const fileByteCodes = ref<Array<ArrayBuffer>>([])
+const handleFileChange = async (event: Event) => {
+  const inputElement = event.target as HTMLInputElement;
+  if (!inputElement.files) return;
+  selectedFiles.value = inputElement.files;
+  fileByteCodes.value = []; 
+  for (const file of Array.from(inputElement.files)) {
+    const byteCode = await readFileAsArrayBuffer(file);
+    fileByteCodes.value.push(byteCode);
+  }
+  console.log('Byte codes:', fileByteCodes.value);
+}
+// Get ArrayBuffer from file
+const readFileAsArrayBuffer = (file: File): Promise<ArrayBuffer> => {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(reader.result as ArrayBuffer);
+    reader.onerror = reject;
+    reader.readAsArrayBuffer(file);
+  });
+}
+
 
 onMounted(() => {
   setInterval(checkStatus, 5000);
 });
+
+
 </script>
 
 <style>

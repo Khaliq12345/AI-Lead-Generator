@@ -3,6 +3,7 @@ export default defineEventHandler(async (event) => {
   const property_details = query.property_details;
   const email_prompt = query.compose_email_prompt;
   const numberOfDomains = query.number_of_domains;
+  const docs = query.docs;
   
   try {
   const baseUrl = useRuntimeConfig().public.API_BASE_URL as string;
@@ -14,6 +15,7 @@ export default defineEventHandler(async (event) => {
           property_details: property_details,
           compose_email_prompt: email_prompt,
           number_of_domains: numberOfDomains,
+          docs: docs,
         },
       });
 
