@@ -21,6 +21,8 @@
           @on-update-text="(newValue) => (propertyDetails = newValue)"
         ></TextArea>
 
+        <UInput type="file" multiple @change="onFileChange"/>
+
         <TextArea
           label="Compose Email Prompt"
           placeholder="Enter email prompt..."
@@ -43,71 +45,47 @@
         </div>
       </form>
 
-      <!-- Logs Drawer Button -->
-      <div class="flex justify-center p-5">
-        <a :href="outputFile" download>Download</a>
+
+      <div class="flex justify-around p-5">
+        <!-- Download Button -->
+        <!-- <a :href="outputFile" download>Download</a> -->
+        <UButton @click="downloadOutput">Download</UButton>
+
+        <!-- Logging -->
+        <UDrawer 
+          direction="right" 
+          inset
+          title="Loggings"
+          description="Showing the logs for the processing"
+        >
+          <UButton label="Show Logs" color="neutral" variant="subtle" trailing-icon="i-lucide-chevron-up"/>
+
+          <template #content>
+            <div class="flex flex-col gap-5 p-5">
+              <UButton label="Refresh Logs" color="neutral" variant="subtle" @click="getLogs"/>
+              <p class="w-full mb-4 whitespace-pre-line font-mono">{{ logs }}</p>
+            </div>
+          </template>
+        </UDrawer>
       </div>
     </div>
-
-    <!-- Logging -->
-    <UDrawer
-      title="Submitted Data Details"
-      description="View and manage submitted property data and email prompts"
-      v-model:open="drawerOpen"
-      :dismissible="false"
-      :handle="false"
-      :ui="{ header: 'flex items-center justify-between' }"
-    >
-      <template #dialogtitle></template>
-      <template #description></template>
-      <template #header>
-        <h2 class="text-highlighted font-semibold"></h2>
-        <div>
-          <Button
-            @click="getLogs"
-            customClass="bg-[0] text-white px-6 py-2 mr-3 rounded hover:bg-black hover:text-white border border-white transition cursor-pointer"
-          >
-            Refresh Logs
-          </Button>
-          <Button @click="clearLogs">Clear Logs</Button>
-          <UButton
-            color="neutral"
-            variant="ghost"
-            icon="i-lucide-x"
-            class="py-2 mt-[-15px] cursor-pointer"
-            @click="drawerOpen = false"
-          />
-        </div>
-      </template>
-      <template #body>
-        <div v-if="isLoading" class="flex justify-center">
-          <div class="loader"></div>
-        </div>
-        <div
-          v-else
-          class="p-6 text-white font-mono break-words whitespace-pre-wrap"
-        >
-          {{ logs.length == 0 ? "Nothing to show !" : logs }}
-        </div>
-      </template>
-    </UDrawer>
   </div>
 </template>
 
 <script setup lang="ts">
 const propertyDetails = ref("");
 const composeEmailPrompt = ref("");
-const logs = ref("");
+const logs = ref("")
 const errorMsg = ref("");
 const successMsg = ref("");
 const isLoading = ref(false);
-const drawerOpen = ref(false);
-const canSubmitForm = computed(() => !!propertyDetails.value);
 const numberOfDomains = ref(10);
 
 const toast = useToast();
 
 const outputFile = ref("");
+
+const selectedFiles = ref<[File | null]>()
 
 function showSuccessToast(title: any, desc: any) {
   toast.add({
@@ -124,7 +102,24 @@ function showErrorToast() {
   });
 }
 
+const onFileChange = (e: any) => {
+  selectedFiles.value = e.target.files
+  console.log(selectedFiles)
+}
+
 async function submitForm() {
+  let fileData = new FormData()
+  if (selectedFiles.value) {
+    for (let file of selectedFiles.value) {
+      if (file) {
+        console.log(await file.arrayBuffer())
+        const blob = new Blob([await file.arrayBuffer()], {
+          'type': file.type
+        })
+        fileData.append("files", blob, file.name)
+      }
+    }
+  }
   if (!propertyDetails.value) {
     errorMsg.value = "Veuillez remplir tous les champs";
     return;
@@ -136,6 +131,8 @@ async function submitForm() {
     isLoading.value = true;
     await clearLogs();
     const data = await $fetch("api/start-processing", {
+      method: "POST",
+      body: fileData,
       params: {
         property_details: propertyDetails.value,
         compose_email_prompt: composeEmailPrompt.value,
@@ -175,13 +172,12 @@ const getLogs = async () => {
   }
   try {
     isLoading.value = true;
-    const response = (await $fetch("/api/get-logs", {
+    const response = (await $fetch("/api/get-log", {
       method: "GET",
     })) as any;
     console.log("status : ", response);
 
     logs.value = response as any;
-    showSuccessToast("Success", "Logs Refreshed");
   } catch (error) {
     console.error("Erreur de requete:", error);
   } finally {
@@ -208,8 +204,29 @@ const checkStatus = async () => {
   }
 };
 
+const downloadOutput = async () => {
+  try {
+    const response = await $fetch(outputFile.value, {
+      method: "GET",
+      responseType: 'blob',
+    });
+    console.log(response)
+
+    const fileURL = window.URL.createObjectURL(response as Blob);
+    const a = document.createElement('a');
+    a.href = fileURL;
+    a.download = "mails.zip"
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    window.URL.revokeObjectURL(fileURL);
+  } catch (error) {
+    console.error("Download failed:", error);
+  } 
+}
+
 onMounted(() => {
-  setInterval(checkStatus, 5000);
+  setInterval(checkStatus, 10000);
 });
 </script>
 
@@ -245,5 +262,8 @@ onMounted(() => {
   100% {
     transform: rotate(360deg);
   }
+}
+.log-text {
+  white-space: pre-line;
 }
 </style>
