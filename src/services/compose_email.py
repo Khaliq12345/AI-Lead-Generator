@@ -39,6 +39,19 @@ def generate_lead_email(
 
     # Generate the response
     try:
+        contents = []
+        if base64_string:
+            contents.append(
+                {
+                    "type": "file",
+                    "file": {
+                        "filename": "input.pdf",
+                        "file_data": f"data:application/pdf;base64,{base64_string}",
+                    },
+                }
+            )
+
+        contents.append({"type": "text", "text": property})
         completion = client.beta.chat.completions.parse(
             model="gpt-4o-2024-08-06",
             temperature=0.2,
@@ -47,15 +60,7 @@ def generate_lead_email(
                 {"role": "system", "content": prompt},
                 {
                     "role": "user",
-                    "content": [
-                        {
-                            "type": "file",
-                            "file": {
-                                "filename": "input.pdf",
-                                "file_data": f"data:application/pdf;base64,{base64_string}",
-                            },
-                        }
-                    ],
+                    "content": contents,
                 },
             ],
             response_format=MailResponse,

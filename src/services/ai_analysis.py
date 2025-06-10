@@ -50,7 +50,9 @@ async def ai_analysis(
             "- Strating Analysis ... \n- Trying to get Company domains from provided property_details ..."
         )
         company_domains: list[str] = generate_company_domains(
-            property_details, number_of_domains=number_of_domains
+            property_details,
+            number_of_domains=number_of_domains,
+            base64_string=base64_string,
         )
         await set_redis_value(
             f"- We Found {len(company_domains)} Company Domains.\n- Starting loop on them ..."

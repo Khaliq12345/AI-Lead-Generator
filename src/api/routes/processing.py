@@ -20,40 +20,43 @@ async def start_processing(
     property_details: str,
     compose_email_prompt: Optional[str] = None,
     number_of_domains: int = 10,
-    files: list[UploadFile] = [],
+    files: Optional[list[UploadFile]] = [],
 ) -> dict:
     try:
+        print(files)
         folder = str(int(datetime.now().timestamp()))
         folder_path = Path(folder)
         folder_path.mkdir(exist_ok=True)
         folder_absolute_path = folder_path.absolute().as_posix()
         print(folder_absolute_path)
-        for file in files:
-            with open(f"{folder_absolute_path}/{file.filename}", "wb") as f:
-                f.write(await file.read())
+        base64_string = ""
+        if files:
+            for file in files:
+                with open(f"{folder_absolute_path}/{file.filename}", "wb") as f:
+                    f.write(await file.read())
 
-        # loop through all the files and convert them all into one pdf file
-        merger = PdfMerger()
-        for file in os.listdir(folder_absolute_path):
-            if ".pdf" in file:
-                merger.append(f"{folder_absolute_path}/{file}")
-                continue
-            output_file = convert_image_to_pdf(
-                f"{folder_absolute_path}/{file}",
-                f"{folder_absolute_path}/{file}.pdf",
-            )
-            merger.append(output_file) if output_file else None
-        merger.write(f"{folder_absolute_path}/{folder}.pdf")
-        merger.close()
+            # loop through all the files and convert them all into one pdf file
+            merger = PdfMerger()
+            for file in os.listdir(folder_absolute_path):
+                if ".pdf" in file:
+                    merger.append(f"{folder_absolute_path}/{file}")
+                    continue
+                output_file = convert_image_to_pdf(
+                    f"{folder_absolute_path}/{file}",
+                    f"{folder_absolute_path}/{file}.pdf",
+                )
+                merger.append(output_file) if output_file else None
+            merger.write(f"{folder_absolute_path}/{folder}.pdf")
+            merger.close()
 
-        # get the base64 format
-        with open(f"{folder_absolute_path}/{folder}.pdf", "rb") as f:
-            data = f.read()
+            # get the base64 format
+            with open(f"{folder_absolute_path}/{folder}.pdf", "rb") as f:
+                data = f.read()
 
-        base64_string = base64.b64encode(data).decode("utf-8")
+            base64_string = base64.b64encode(data).decode("utf-8")
 
-        # delete the folder
-        shutil.rmtree(folder_absolute_path)
+            # delete the folder
+            shutil.rmtree(folder_absolute_path)
 
         # Set Processing
         background_tasks.add_task(
