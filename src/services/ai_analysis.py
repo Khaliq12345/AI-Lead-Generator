@@ -38,7 +38,7 @@ async def ai_analysis(
     number_of_domains: int = 10,
     base64_string: str = "",
 ) -> None:
-    output_folder = "./interface/public/outputs"
+    output_folder = "./outputs"
     Path(output_folder).mkdir(exist_ok=True)
     folder = int(datetime.datetime.now().timestamp())
     folder_path = Path(f"{output_folder}/{folder}")
@@ -95,7 +95,7 @@ async def ai_analysis(
             )
         folder_to_zip(absolute_path)
         await set_redis_value("----- Ending -----\n- Processing Task Ended")
-        update_status(f"success:/outputs/{folder}/mails.zip")
+        update_status(f"success:{absolute_path}/mails.zip")
     except Exception as e:
         print(f"Error - {e}")
         await set_redis_value(

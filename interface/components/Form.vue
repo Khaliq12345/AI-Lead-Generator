@@ -52,7 +52,7 @@
         <UButton @click="downloadOutput">Download</UButton>
 
         <!-- Logging -->
-        <UDrawer 
+        <!-- <UDrawer 
           direction="right" 
           inset
           title="Loggings"
@@ -66,7 +66,8 @@
               <p class="w-full mb-4 whitespace-pre-line font-mono">{{ logs }}</p>
             </div>
           </template>
-        </UDrawer>
+        </UDrawer> -->
+        
       </div>
     </div>
   </div>
@@ -80,11 +81,8 @@ const errorMsg = ref("");
 const successMsg = ref("");
 const isLoading = ref(false);
 const numberOfDomains = ref(10);
-
 const toast = useToast();
-
 const outputFile = ref("");
-
 const selectedFiles = ref<[File | null]>()
 
 function showSuccessToast(title: any, desc: any) {
@@ -171,7 +169,6 @@ const getLogs = async () => {
     return;
   }
   try {
-    isLoading.value = true;
     const response = (await $fetch("/api/get-log", {
       method: "GET",
     })) as any;
@@ -180,8 +177,6 @@ const getLogs = async () => {
     logs.value = response as any;
   } catch (error) {
     console.error("Erreur de requete:", error);
-  } finally {
-    isLoading.value = false;
   }
 };
 
@@ -206,9 +201,11 @@ const checkStatus = async () => {
 
 const downloadOutput = async () => {
   try {
-    const response = await $fetch(outputFile.value, {
+    const response = await $fetch("/api/download-file", {
       method: "GET",
-      responseType: 'blob',
+      params: {
+        'filename': outputFile.value
+      }
     });
     console.log(response)
 
@@ -227,6 +224,7 @@ const downloadOutput = async () => {
 
 onMounted(() => {
   setInterval(checkStatus, 10000);
+  // setInterval(getLogs, 2000)
 });
 </script>
 
