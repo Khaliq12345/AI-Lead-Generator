@@ -1,4 +1,5 @@
 import os
+from time import sleep
 import zipfile
 from pathlib import Path
 import datetime
@@ -32,7 +33,7 @@ def folder_to_zip(folder: str | Path):
         os.remove(file_path) if ".md" in file_path else None
 
 
-async def ai_analysis(
+def ai_analysis(
     property_details: str,
     compose_email_prompt: Optional[str] = None,
     number_of_domains: int = 10,
@@ -46,7 +47,7 @@ async def ai_analysis(
     absolute_path = folder_path.absolute().as_posix()
     update_status("running")
     try:
-        await set_redis_value(
+        set_redis_value(
             "- Strating Analysis ... \n- Trying to get Company domains from provided property_details ..."
         )
         company_domains: list[str] = generate_company_domains(
@@ -54,19 +55,14 @@ async def ai_analysis(
             number_of_domains=number_of_domains,
             base64_string=base64_string,
         )
-        await set_redis_value(
+        set_redis_value(
             f"- We Found {len(company_domains)} Company Domains.\n- Starting loop on them ..."
         )
         for i, company_domain in enumerate(company_domains):
-            await set_redis_value(
-                f"--- Dealing with domain number {i + 1} : {company_domain}. We're trying to extract emails"
-            )
+            sleep(10)
             emails = main_extract_domain(company_domain)
-            await set_redis_value(
-                f"--- Email Extraction ended. We've got {len(emails)} emails for this domain.\n--- Extraction results : {str(emails)}\n--- Starting loop on them ..."
-            )
             for j, email in enumerate(emails):
-                await set_redis_value(
+                set_redis_value(
                     f"----- Composing Email number {j + 1} with : {email} as mail receiver ..."
                 )
                 compose_email = generate_lead_email(
@@ -90,15 +86,15 @@ async def ai_analysis(
                                 f"{top_message}\n--------------------------------------------\n\n"
                                 f"# Body\n\n**Subject** - {compose_email.subject}\n\n{compose_email.body}"
                             )
-            await set_redis_value(
+            set_redis_value(
                 f"----- Progress : {i + 1} / {len(company_domains)} ---> {100 * (i + 1) / len(company_domains)} %  -----"
             )
         folder_to_zip(absolute_path)
-        await set_redis_value("----- Ending -----\n- Processing Task Ended")
+        set_redis_value("----- Ending -----\n- Processing Task Ended")
         update_status(f"success:{absolute_path}/mails.zip")
     except Exception as e:
         print(f"Error - {e}")
-        await set_redis_value(
+        set_redis_value(
             f"----- Got Error : {str(e)}\n--------------- Analysis Unfortunately Ended  ---------------"
         )
         update_status("failed")

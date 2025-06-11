@@ -66,9 +66,5 @@ def generate_company_domains(
             return []
         return message_text.links
     except Exception as e:
-        asyncio.create_task(
-            set_redis_value(
-                f"----- Got Error while generating company domains : {str(e)}"
-            )
-        )
+        set_redis_value(f"----- Got Error while generating company domains : {str(e)}")
         return []

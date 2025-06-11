@@ -1,3 +1,4 @@
+import asyncio
 import shutil
 import os
 from pathlib import Path
@@ -15,7 +16,7 @@ router = APIRouter(prefix="", responses={404: {"description": "Not found"}})
 
 # Start Processing
 @router.post("/start-processing", response_model=dict)
-async def start_processing(
+def start_processing(
     background_tasks: BackgroundTasks,
     property_details: str,
     compose_email_prompt: Optional[str] = None,
@@ -23,7 +24,6 @@ async def start_processing(
     files: Optional[list[UploadFile]] = [],
 ) -> dict:
     try:
-        print(files)
         folder = str(int(datetime.now().timestamp()))
         folder_path = Path(folder)
         folder_path.mkdir(exist_ok=True)
@@ -33,7 +33,8 @@ async def start_processing(
         if files:
             for file in files:
                 with open(f"{folder_absolute_path}/{file.filename}", "wb") as f:
-                    f.write(await file.read())
+                    contents = file.file.read()
+                    f.write(contents)
 
             # loop through all the files and convert them all into one pdf file
             merger = PdfMerger()
@@ -55,9 +56,6 @@ async def start_processing(
 
             base64_string = base64.b64encode(data).decode("utf-8")
 
-            # delete the folder
-            shutil.rmtree(folder_absolute_path)
-
         # Set Processing
         background_tasks.add_task(
             ai_analysis,
@@ -66,10 +64,14 @@ async def start_processing(
             number_of_domains,
             base64_string,
         )
+
+        # delete the folder
+        shutil.rmtree(folder_absolute_path)
         return {
             "message": "AI Analysis started in background",
         }
     except Exception as e:
+        print(e)
         raise HTTPException(500, detail=str(e))
 
 

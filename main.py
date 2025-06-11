@@ -1,6 +1,3 @@
-from PyPDF2 import PdfReader, PdfMerger
-import io
-import base64
 from src.services import compose_email
 from src.api.app import start_app
 
@@ -15,7 +12,6 @@ Ideal site for medical, shelter, nursing home, charter school, and more
 Asking Price: $10,750,000. Find me the most likely buyer for the above and attached property please include website, final decision maker for real estate investments,
 and email address. Its ideal for medical, shelter, nursing home, charter school,
 """
-
 
 if __name__ == "__main__":
     print("Hello world!")
