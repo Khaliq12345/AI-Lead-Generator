@@ -21,7 +21,7 @@
           @on-update-text="(newValue) => (propertyDetails = newValue)"
         ></TextArea>
 
-        <UInput type="file" multiple @change="onFileChange"/>
+        <UInput type="file" multiple @change="onFileChange" />
 
         <TextArea
           label="Compose Email Prompt"
@@ -45,29 +45,39 @@
         </div>
       </form>
 
-
       <div class="flex justify-around p-5">
         <!-- Download Button -->
         <!-- <a :href="outputFile" download>Download</a> -->
         <UButton @click="downloadOutput">Download</UButton>
 
         <!-- Logging -->
-        <!-- <UDrawer 
-          direction="right" 
+        <UDrawer
+          direction="right"
           inset
           title="Loggings"
           description="Showing the logs for the processing"
         >
-          <UButton label="Show Logs" color="neutral" variant="subtle" trailing-icon="i-lucide-chevron-up"/>
+          <UButton
+            label="Show Logs"
+            color="neutral"
+            variant="subtle"
+            trailing-icon="i-lucide-chevron-up"
+          />
 
           <template #content>
             <div class="flex flex-col gap-5 p-5">
-              <UButton label="Refresh Logs" color="neutral" variant="subtle" @click="getLogs"/>
-              <p class="w-full mb-4 whitespace-pre-line font-mono">{{ logs }}</p>
+              <UButton
+                label="Refresh Logs"
+                color="neutral"
+                variant="subtle"
+                @click="getLogs"
+              />
+              <p class="w-full mb-4 whitespace-pre-line font-mono">
+                {{ logs }}
+              </p>
             </div>
           </template>
-        </UDrawer> -->
-        
+        </UDrawer>
       </div>
     </div>
   </div>
@@ -76,14 +86,14 @@
 <script setup lang="ts">
 const propertyDetails = ref("");
 const composeEmailPrompt = ref("");
-const logs = ref("")
+const logs = ref("");
 const errorMsg = ref("");
 const successMsg = ref("");
 const isLoading = ref(false);
 const numberOfDomains = ref(10);
 const toast = useToast();
 const outputFile = ref("");
-const selectedFiles = ref<[File | null]>()
+const selectedFiles = ref<[File | null]>();
 
 function showSuccessToast(title: any, desc: any) {
   toast.add({
@@ -101,20 +111,20 @@ function showErrorToast() {
 }
 
 const onFileChange = (e: any) => {
-  selectedFiles.value = e.target.files
-  console.log(selectedFiles)
-}
+  selectedFiles.value = e.target.files;
+  console.log(selectedFiles);
+};
 
 async function submitForm() {
-  let fileData = new FormData()
+  let fileData = new FormData();
   if (selectedFiles.value) {
     for (let file of selectedFiles.value) {
       if (file) {
-        console.log(await file.arrayBuffer())
+        console.log(await file.arrayBuffer());
         const blob = new Blob([await file.arrayBuffer()], {
-          'type': file.type
-        })
-        fileData.append("files", blob, file.name)
+          type: file.type,
+        });
+        fileData.append("files", blob, file.name);
       }
     }
   }
@@ -165,9 +175,6 @@ const clearLogs = async () => {
 };
 
 const getLogs = async () => {
-  if (isLoading.value == true) {
-    return;
-  }
   try {
     const response = (await $fetch("/api/get-log", {
       method: "GET",
@@ -204,23 +211,23 @@ const downloadOutput = async () => {
     const response = await $fetch("/api/download-file", {
       method: "GET",
       params: {
-        'filename': outputFile.value
-      }
+        filename: outputFile.value,
+      },
     });
-    console.log(response)
+    console.log(response);
 
     const fileURL = window.URL.createObjectURL(response as Blob);
-    const a = document.createElement('a');
+    const a = document.createElement("a");
     a.href = fileURL;
-    a.download = "mails.zip"
+    a.download = "mails.zip";
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);
     window.URL.revokeObjectURL(fileURL);
   } catch (error) {
     console.error("Download failed:", error);
-  } 
-}
+  }
+};
 
 onMounted(() => {
   setInterval(checkStatus, 10000);
