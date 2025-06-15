@@ -1,10 +1,14 @@
-import asyncio
+import json
 import httpx
 from src.core import config
 from typing import List, Dict
 from urllib.parse import urlparse
 
+from src.models.model import Lead, Leads
 from src.services.redis_services import set_redis_value
+from openai import OpenAI
+
+client = OpenAI(api_key=config.OPENAI_KEY)
 
 
 def extract_domain(url) -> str:
@@ -55,6 +59,60 @@ def filter_emails(
     ]
 
 
+def filter_emails_with_ai(lead_info: list[Dict], domain: str) -> List[Dict]:
+    prompt = f"""
+    You are an AI assistant who helps identify leads that are involve in acquisitions or investment decisions.
+    You are provided with a list of leads in a dict with some information like name, email, phone and position,
+    Your task is to filter and return only executive that are involve in acquisitions or investment decisions.
+    Position like - 
+    Head of Acquisitions
+    Chief Investment Officer
+    Managing Principal
+    Asset Manager
+    Portfolio Manager
+    SVP/EVP of Real Estate or Development
+    Executive Director
+    CEO, President (only if involved in acquisitions or investment decisions)
+
+    Leads: {lead_info}
+    Domain: {domain}
+    """.strip()
+
+    # Generate the
+    try:
+        contents = []
+        contents.append(
+            {
+                "type": "text",
+                "text": "Filter the leads to have only executive that are involve in acquisitions or investment decisions.",
+            }
+        )
+
+        completion = client.beta.chat.completions.parse(
+            model="gpt-4o-2024-08-06",
+            temperature=0.2,
+            max_tokens=300,
+            messages=[
+                {"role": "system", "content": prompt},
+                {
+                    "role": "user",
+                    "content": contents,
+                },
+            ],
+            response_format=Leads,
+        )
+
+        parsed = completion.choices[0].message.parsed
+        if not parsed:
+            return []
+        leads = json.loads(parsed.model_dump_json())
+        leads = [lead for lead in leads.get("leads", [])]
+        return leads
+    except Exception as e:
+        print(f"Error filtering leads - {e}")
+    return []
+
+
 # Main function
 def main_extract_domain(
     domain: str,  # ex : https://www.stripe.com/
@@ -66,10 +124,10 @@ def main_extract_domain(
             print("Aucun emails pour le domaine trouvé ou erreur d'appel.")
             return []
         filtered = filter_emails(emails)
-        print("\n📧 E-mails filtrés renvoyés :")
-        for email in filtered:
-            print(f" - {email}\n")
-        return filtered
+        ai_filtered = filter_emails_with_ai(filtered, domain)
+        return ai_filtered
     except Exception as e:
-        set_redis_value(f"----- Got Error while extracting domain's emails : {str(e)}")
+        set_redis_value(
+            f"----- Got Error while extracting domain's emails : {str(e)}"
+        )
         return []

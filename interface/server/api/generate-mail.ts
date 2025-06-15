@@ -1,11 +1,15 @@
 export default defineEventHandler(async (event) => {
-  const body = await readFormData(event)
-  const query = getQuery(event);
-  const property_details = query.property_details;
-  const email_prompt = query.compose_email_prompt;
-  const numberOfDomains = query.number_of_domains;
+  const body = await readFormData(event);
+  const {
+    property_details,
+    client_name,
+    lead_mail,
+    lead_name,
+    lead_position,
+    additional_prompt,
+  } = getQuery(event);
 
-  event.path
+  event.path;
 
   try {
     const baseUrl = useRuntimeConfig().public.API_BASE_URL as string;
@@ -15,11 +19,14 @@ export default defineEventHandler(async (event) => {
       body: body,
       params: {
         property_details: property_details,
-        compose_email_prompt: email_prompt,
-        number_of_domains: numberOfDomains,
+        client_name: client_name,
+        lead_mail: lead_mail,
+        lead_name: lead_name,
+        lead_position: lead_position,
+        additional_prompt: additional_prompt,
       },
       headers: {
-        'accept': '*/*',
+        accept: "*/*",
       },
     });
 

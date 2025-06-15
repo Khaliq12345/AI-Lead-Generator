@@ -7,7 +7,22 @@
         AI Lead Generator
       </h1>
 
-      <form @submit.prevent class="space-y-6">
+      <UButton
+        block
+        @click="generateMail = true"
+        v-if="!generateMail"
+        class="my-5"
+        >Generate Mail Instead</UButton
+      >
+      <UButton
+        block
+        @click="generateMail = false"
+        v-if="generateMail"
+        class="my-5"
+        >Generate Lead Instead</UButton
+      >
+
+      <form @submit.prevent class="space-y-6 flex flex-col">
         <div v-if="errorMsg" class="errorMsg">
           <strong>{{ errorMsg }}</strong>
         </div>
@@ -23,19 +38,24 @@
 
         <UInput type="file" multiple @change="onFileChange" />
 
-        <TextArea
-          label="Compose Email Prompt"
-          placeholder="Enter email prompt..."
-          :rows="5"
-          @on-update-text="(newValue) => (composeEmailPrompt = newValue)"
-        ></TextArea>
-
-        <label id="domains-number">Domains: </label>
+        <label id="domains-number" v-if="!generateMail">Domains: </label>
         <UInputNumber
           placeholder="Number of companies"
           id="domains-number"
           v-model="numberOfDomains"
+          v-if="!generateMail"
         />
+
+        <div class="flex flex-col gap-4" v-if="generateMail">
+          <UInput placeholder="Client Name" v-model="client_name"></UInput>
+          <UInput placeholder="Lead Mail" v-model="lead_mail"></UInput>
+          <UInput placeholder="Lead Name" v-model="lead_name"></UInput>
+          <UInput placeholder="Lead Position" v-model="lead_position"></UInput>
+          <UInput
+            placeholder="Additional Prompt"
+            v-model="additional_prompt"
+          ></UInput>
+        </div>
 
         <div v-if="isLoading" class="flex justify-center">
           <div class="loader"></div>
@@ -45,10 +65,20 @@
         </div>
       </form>
 
+      <UTextarea
+        v-if="outputMail && generateMail"
+        v-model="outputMail"
+        class="w-full my-5"
+      ></UTextarea>
+
       <div class="flex justify-around p-5">
         <!-- Download Button -->
-        <!-- <a :href="outputFile" download>Download</a> -->
-        <UButton @click="downloadOutput">Download</UButton>
+        <UButton
+          @click="downloadOutput()"
+          :disabled="!outputs"
+          v-if="!generateMail"
+          >Download</UButton
+        >
 
         <!-- Logging -->
         <UDrawer
@@ -56,6 +86,7 @@
           inset
           title="Loggings"
           description="Showing the logs for the processing"
+          v-if="!generateMail"
         >
           <UButton
             label="Show Logs"
@@ -72,7 +103,9 @@
                 variant="subtle"
                 @click="getLogs"
               />
-              <p class="w-full mb-4 whitespace-pre-line font-mono">
+              <p
+                class="w-full mb-4 whitespace-pre-line font-mono overflow-y-auto"
+              >
                 {{ logs }}
               </p>
             </div>
@@ -84,16 +117,23 @@
 </template>
 
 <script setup lang="ts">
+const outputMail = ref();
+const client_name: Ref<string> = ref("");
+const lead_mail: Ref<string> = ref("");
+const lead_name: Ref<string> = ref("");
+const lead_position: Ref<string> = ref("");
+const additional_prompt: Ref<string> = ref("");
+const taskId = ref();
 const propertyDetails = ref("");
-const composeEmailPrompt = ref("");
 const logs = ref("");
 const errorMsg = ref("");
 const successMsg = ref("");
 const isLoading = ref(false);
 const numberOfDomains = ref(10);
 const toast = useToast();
-const outputFile = ref("");
 const selectedFiles = ref<[File | null]>();
+const outputs = ref();
+const generateMail = ref(false);
 
 function showSuccessToast(title: any, desc: any) {
   toast.add({
@@ -138,17 +178,35 @@ async function submitForm() {
   try {
     isLoading.value = true;
     await clearLogs();
-    const data = await $fetch("api/start-processing", {
-      method: "POST",
-      body: fileData,
-      params: {
-        property_details: propertyDetails.value,
-        compose_email_prompt: composeEmailPrompt.value,
-        number_of_domains: numberOfDomains.value,
-      },
-    });
-    console.log("Response", data);
-    showSuccessToast("Success", "AI lead generation done!");
+    if (!generateMail) {
+      const data = await $fetch("api/get-leads", {
+        method: "POST",
+        body: fileData,
+        params: {
+          property_details: propertyDetails.value,
+          number_of_domains: numberOfDomains.value,
+        },
+      });
+      console.log("Response", data);
+      showSuccessToast("Success", "AI lead generation done!");
+      taskId.value = data;
+    } else {
+      const data = await $fetch("api/generate-mail", {
+        method: "POST",
+        body: fileData,
+        params: {
+          property_details: propertyDetails.value,
+          client_name: client_name.value,
+          lead_mail: lead_mail.value,
+          lead_name: lead_name.value,
+          lead_position: lead_position.value,
+          additional_prompt: additional_prompt.value,
+        },
+      });
+      showSuccessToast("Success", "AI lead generation done!");
+      outputMail.value = data;
+      isLoading.value = false;
+    }
   } catch (e) {
     console.error("Une erreur inattendue s'est produite :", e);
     showErrorToast();
@@ -179,8 +237,6 @@ const getLogs = async () => {
     const response = (await $fetch("/api/get-log", {
       method: "GET",
     })) as any;
-    console.log("status : ", response);
-
     logs.value = response as any;
   } catch (error) {
     console.error("Erreur de requete:", error);
@@ -188,16 +244,20 @@ const getLogs = async () => {
 };
 
 const checkStatus = async () => {
+  if (!taskId.value || !generateMail) return;
   try {
     const response = (await $fetch("/api/check-status", {
       method: "GET",
+      params: {
+        taskId: taskId.value,
+      },
     })) as any;
     console.log("Status - ", response.status);
     if (response.status === "running") {
       isLoading.value = true;
     } else if (response.status === "success") {
-      outputFile.value = response.folder;
       isLoading.value = false;
+      outputs.value = response.data;
     } else {
       isLoading.value = false;
     }
@@ -208,18 +268,15 @@ const checkStatus = async () => {
 
 const downloadOutput = async () => {
   try {
-    const response = await $fetch("/api/download-file", {
-      method: "GET",
-      params: {
-        filename: outputFile.value,
-      },
-    });
-    console.log(response);
-
-    const fileURL = window.URL.createObjectURL(response as Blob);
+    if (!outputs.value) {
+      console.log("nothing to download");
+      return {};
+    }
+    const jsonBlob = new Blob([outputs.value], { type: "text/plain" });
+    const fileURL = window.URL.createObjectURL(jsonBlob);
     const a = document.createElement("a");
     a.href = fileURL;
-    a.download = "mails.zip";
+    a.download = "mails.txt";
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);
@@ -231,7 +288,6 @@ const downloadOutput = async () => {
 
 onMounted(() => {
   setInterval(checkStatus, 10000);
-  // setInterval(getLogs, 2000)
 });
 </script>
 

@@ -1,13 +1,9 @@
 import os
-from time import sleep
 import zipfile
 from pathlib import Path
-import datetime
-from typing import Optional
 from src.core import config
 from src.services.get_emails import main_extract_domain
 from src.services.generate_company_domains import generate_company_domains
-from src.services.compose_email import generate_lead_email
 from src.services.redis_services import set_redis_value
 
 
@@ -33,19 +29,14 @@ def folder_to_zip(folder: str | Path):
         os.remove(file_path) if ".md" in file_path else None
 
 
-def ai_analysis(
+def get_leads(
+    tasks: dict,
+    task_id: str,
     property_details: str,
-    compose_email_prompt: Optional[str] = None,
     number_of_domains: int = 10,
     base64_string: str = "",
 ) -> None:
-    output_folder = "./outputs"
-    Path(output_folder).mkdir(exist_ok=True)
-    folder = int(datetime.datetime.now().timestamp())
-    folder_path = Path(f"{output_folder}/{folder}")
-    folder_path.mkdir(exist_ok=True)
-    absolute_path = folder_path.absolute().as_posix()
-    update_status("running")
+    outputs_text = ""
     try:
         set_redis_value(
             "- Strating Analysis ... \n- Trying to get Company domains from provided property_details ..."
@@ -59,42 +50,20 @@ def ai_analysis(
             f"- We Found {len(company_domains)} Company Domains.\n- Starting loop on them ..."
         )
         for i, company_domain in enumerate(company_domains):
-            sleep(10)
             emails = main_extract_domain(company_domain)
-            for j, email in enumerate(emails):
-                set_redis_value(
-                    f"----- Composing Email number {j + 1} with : {email} as mail receiver ..."
-                )
-                compose_email = generate_lead_email(
-                    send_from=config.CLIENT_EMAIL,
-                    send_to=email["email"],
-                    lead_name=f"{email['first_name']} {email['last_name']}",
-                    lead_position=email["position"],
-                    property=property_details,
-                    additional_prompt=compose_email_prompt,
-                    base64_string=base64_string,
-                )
-                if compose_email:
-                    with open(f"{absolute_path}/{i}_{j}_mail.md", "w") as f:
-                        top_message = (
-                            f"Name - {email['first_name']} {email['last_name']}"
-                            f"\nEmail - {compose_email.send_to}\nDomain - {company_domain}\n"
-                            f"Position - {email['position']}"
-                        )
-                        if compose_email:
-                            f.write(
-                                f"{top_message}\n--------------------------------------------\n\n"
-                                f"# Body\n\n**Subject** - {compose_email.subject}\n\n{compose_email.body}"
-                            )
             set_redis_value(
                 f"----- Progress : {i + 1} / {len(company_domains)} ---> {100 * (i + 1) / len(company_domains)} %  -----"
             )
-        folder_to_zip(absolute_path)
-        set_redis_value("----- Ending -----\n- Processing Task Ended")
-        update_status(f"success:{absolute_path}/mails.zip")
+            for email in emails:
+                for key in email.keys():
+                    outputs_text += f"{key.capitalize()}: {email[key]}\n"
+            outputs_text += "-------------\n"
+
+        tasks[task_id]["data"] = outputs_text
+        tasks[task_id]["status"] = "success"
     except Exception as e:
         print(f"Error - {e}")
         set_redis_value(
             f"----- Got Error : {str(e)}\n--------------- Analysis Unfortunately Ended  ---------------"
         )
-        update_status("failed")
+        tasks[task_id]["status"] = "failed"
