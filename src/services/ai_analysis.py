@@ -1,15 +1,9 @@
 import os
 import zipfile
 from pathlib import Path
-from src.core import config
 from src.services.get_emails import main_extract_domain
 from src.services.generate_company_domains import generate_company_domains
 from src.services.redis_services import set_redis_value
-
-
-def update_status(value: str):
-    with open(config.STATUS_FILE, "w") as f:
-        f.write(f"{value}")
 
 
 def folder_to_zip(folder: str | Path):

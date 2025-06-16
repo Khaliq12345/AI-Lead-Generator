@@ -6,7 +6,6 @@ from fastapi import APIRouter, HTTPException, BackgroundTasks, UploadFile
 from src.services.ai_analysis import get_leads
 from src.services.compose_email import generate_lead_email
 from src.services.pdf_service import convert_image_to_pdf
-from src.core.config import STATUS_FILE
 from PyPDF2 import PdfMerger
 from datetime import datetime
 import base64
@@ -22,7 +21,6 @@ def convert_files_to_base64(files: List[UploadFile]) -> str:
     folder_path = Path(folder)
     folder_path.mkdir(exist_ok=True)
     folder_absolute_path = folder_path.absolute().as_posix()
-    print(folder_absolute_path)
     base64_string = ""
     if files:
         for file in files:

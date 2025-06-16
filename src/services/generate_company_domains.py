@@ -1,4 +1,3 @@
-import asyncio
 from openai import OpenAI
 from src.core import config
 from src.models.model import DomainResponse

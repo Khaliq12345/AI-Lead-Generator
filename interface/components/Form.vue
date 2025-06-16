@@ -7,6 +7,7 @@
         AI Lead Generator
       </h1>
 
+      <!-- Buttons shown only during Lead generation -->
       <UButton
         block
         @click="generateMail = true"
@@ -14,6 +15,8 @@
         class="my-5"
         >Generate Mail Instead</UButton
       >
+
+      <!-- Buttons shown only during Mail generation -->
       <UButton
         block
         @click="generateMail = false"
@@ -22,6 +25,7 @@
         >Generate Lead Instead</UButton
       >
 
+      <!-- Form of both generation -->
       <form @submit.prevent class="space-y-6 flex flex-col">
         <div v-if="errorMsg" class="errorMsg">
           <strong>{{ errorMsg }}</strong>
@@ -38,6 +42,7 @@
 
         <UInput type="file" multiple @change="onFileChange" />
 
+        <!-- Total number to generate from Propert details -->
         <label id="domains-number" v-if="!generateMail">Domains: </label>
         <UInputNumber
           placeholder="Number of companies"
@@ -46,13 +51,14 @@
           v-if="!generateMail"
         />
 
+        <!-- Input used in generating mails -->
         <div class="flex flex-col gap-4" v-if="generateMail">
           <UInput placeholder="Client Name" v-model="client_name"></UInput>
           <UInput placeholder="Lead Mail" v-model="lead_mail"></UInput>
           <UInput placeholder="Lead Name" v-model="lead_name"></UInput>
           <UInput placeholder="Lead Position" v-model="lead_position"></UInput>
           <UInput
-            placeholder="Additional Prompt"
+            placeholder="Email Additional Prompt"
             v-model="additional_prompt"
           ></UInput>
         </div>
@@ -65,6 +71,7 @@
         </div>
       </form>
 
+      <!-- Show the generated mail -->
       <UTextarea
         v-if="outputMail && generateMail"
         v-model="outputMail"
@@ -80,7 +87,7 @@
           >Download</UButton
         >
 
-        <!-- Logging -->
+        <!-- logging -->
         <UDrawer
           direction="right"
           inset
@@ -152,7 +159,6 @@ function showErrorToast() {
 
 const onFileChange = (e: any) => {
   selectedFiles.value = e.target.files;
-  console.log(selectedFiles);
 };
 
 async function submitForm() {
@@ -178,7 +184,7 @@ async function submitForm() {
   try {
     isLoading.value = true;
     await clearLogs();
-    if (!generateMail) {
+    if (!generateMail.value) {
       const data = await $fetch("api/get-leads", {
         method: "POST",
         body: fileData,
