@@ -166,7 +166,6 @@ async function submitForm() {
   if (selectedFiles.value) {
     for (let file of selectedFiles.value) {
       if (file) {
-        console.log(await file.arrayBuffer());
         const blob = new Blob([await file.arrayBuffer()], {
           type: file.type,
         });
@@ -250,7 +249,7 @@ const getLogs = async () => {
 };
 
 const checkStatus = async () => {
-  if (!taskId.value || !generateMail) return;
+  if (!taskId.value || generateMail.value) return;
   try {
     const response = (await $fetch("/api/check-status", {
       method: "GET",

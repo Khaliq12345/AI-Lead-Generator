@@ -9,8 +9,6 @@ export default defineEventHandler(async (event) => {
     additional_prompt,
   } = getQuery(event);
 
-  event.path;
-
   try {
     const baseUrl = useRuntimeConfig().public.API_BASE_URL as string;
     const response = await $fetch(event.path, {
@@ -28,6 +26,7 @@ export default defineEventHandler(async (event) => {
       headers: {
         accept: "*/*",
       },
+      timeout: 60000,
     });
 
     return response; //
