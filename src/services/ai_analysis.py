@@ -2,7 +2,10 @@ import os
 import zipfile
 from pathlib import Path
 from src.services.get_emails import main_extract_domain
-from src.services.generate_company_domains import generate_company_domains
+from src.services.generate_company_domains import (
+    generate_company_domains,
+    generate_email_leads,
+)
 from src.services.redis_services import set_redis_value
 
 
@@ -35,22 +38,27 @@ def get_leads(
         set_redis_value(
             "- Strating Analysis ... \n- Trying to get Company domains from provided property_details ..."
         )
-        company_domains: list[str] = generate_company_domains(
+        leads = generate_email_leads(
             property_details,
             number_of_domains=number_of_domains,
             base64_string=base64_string,
         )
-        set_redis_value(
-            f"- We Found {len(company_domains)} Company Domains.\n- Starting loop on them ..."
-        )
-        for i, company_domain in enumerate(company_domains):
-            emails = main_extract_domain(company_domain)
-            set_redis_value(
-                f"----- Progress : {i + 1} / {len(company_domains)} ---> {100 * (i + 1) / len(company_domains)} %  -----"
-            )
-            for email in emails:
-                for key in email.keys():
-                    outputs_text += f"{key.capitalize()}: {email[key]}\n"
+        # company_domains: list[str] = generate_company_domains(
+        #     property_details,
+        #     number_of_domains=number_of_domains,
+        #     base64_string=base64_string,
+        # )
+        # set_redis_value(
+        #     f"- We Found {len(company_domains)} Company Domains.\n- Starting loop on them ..."
+        # )
+        # for i, company_domain in enumerate(company_domains):
+        #     emails = main_extract_domain(company_domain)
+        #     set_redis_value(
+        #         f"----- Progress : {i + 1} / {len(company_domains)} ---> {100 * (i + 1) / len(company_domains)} %  -----"
+        #     )
+        for lead in leads:
+            for key in lead.keys():
+                outputs_text += f"{key.capitalize()}: {lead[key]}\n"
             outputs_text += "-------------\n"
 
         tasks[task_id]["data"] = outputs_text
