@@ -9,8 +9,14 @@ from src.services.pdf_service import convert_image_to_pdf
 from PyPDF2 import PdfMerger
 from datetime import datetime
 import base64
+from enum import Enum
 
 router = APIRouter(prefix="", responses={404: {"description": "Not found"}})
+
+
+class LeadType(Enum):
+    BUYING = "buying"
+    SELLING = "selling"
 
 
 tasks = {}
@@ -58,6 +64,7 @@ def get_lead_route(
     background_tasks: BackgroundTasks,
     property_details,
     number_of_domains,
+    lead_type: LeadType,
     files: List[UploadFile] = [],
 ) -> Optional[str]:
     task_id = str(int(datetime.now().timestamp()))
@@ -71,6 +78,7 @@ def get_lead_route(
             base64_string=base64_string,
             tasks=tasks,
             task_id=task_id,
+            lead_type=lead_type.value,
         )
         return task_id
     except Exception as e:

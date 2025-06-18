@@ -3,6 +3,7 @@ export default defineEventHandler(async (event) => {
   const query = getQuery(event);
   const property_details = query.property_details;
   const numberOfDomains = query.number_of_domains;
+  const leadType = query.lead_type;
 
   event.path;
 
@@ -15,6 +16,7 @@ export default defineEventHandler(async (event) => {
       params: {
         property_details: property_details,
         number_of_domains: numberOfDomains,
+        lead_type: leadType,
       },
       headers: {
         accept: "*/*",

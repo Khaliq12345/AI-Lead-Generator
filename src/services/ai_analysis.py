@@ -30,6 +30,7 @@ def get_leads(
     tasks: dict,
     task_id: str,
     property_details: str,
+    lead_type: str,
     number_of_domains: int = 10,
     base64_string: str = "",
 ) -> None:
@@ -42,6 +43,7 @@ def get_leads(
             property_details,
             number_of_domains=number_of_domains,
             base64_string=base64_string,
+            lead_type=lead_type,
         )
         # company_domains: list[str] = generate_company_domains(
         #     property_details,

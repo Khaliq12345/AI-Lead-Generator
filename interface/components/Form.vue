@@ -33,6 +33,9 @@
         <div v-if="successMsg" class="successMsg">
           <strong>{{ successMsg }}</strong>
         </div>
+
+        <URadioGroup v-model="Togglervalue" :items="ToggleItems" />
+
         <TextArea
           label="Property Details"
           placeholder="Enter property details..."
@@ -124,6 +127,8 @@
 </template>
 
 <script setup lang="ts">
+import type { RadioGroupItem, RadioGroupValue } from "@nuxt/ui";
+
 const outputMail = ref();
 const client_name: Ref<string> = ref("");
 const lead_mail: Ref<string> = ref("");
@@ -141,6 +146,8 @@ const toast = useToast();
 const selectedFiles = ref<[File | null]>();
 const outputs = ref();
 const generateMail = ref(false);
+const ToggleItems: Ref<RadioGroupItem[]> = ref(["buying", "selling"]);
+const Togglervalue: Ref<RadioGroupValue> = ref("buying");
 
 function showSuccessToast(title: any, desc: any) {
   toast.add({
@@ -190,6 +197,7 @@ async function submitForm() {
         params: {
           property_details: propertyDetails.value,
           number_of_domains: numberOfDomains.value,
+          lead_type: Togglervalue.value,
         },
       });
       console.log("Response", data);
