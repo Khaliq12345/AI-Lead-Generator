@@ -1,4 +1,3 @@
-import os
 import uvicorn
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
@@ -29,6 +28,6 @@ def start_app():
     uvicorn.run(
         "src.api.app:app",
         host="localhost",
-        port=8090,
+        port=8000,
         reload=ENV != "prod",
     )

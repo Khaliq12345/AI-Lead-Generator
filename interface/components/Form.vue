@@ -7,76 +7,6 @@
         AI Lead Generator
       </h1>
 
-<<<<<<< HEAD
-      <form @submit.prevent class="space-y-6">
-        <div v-if="errorMsg" class="errorMsg">
-          <strong>{{ errorMsg }}</strong>
-        </div>
-        <div v-if="successMsg" class="successMsg">
-          <strong>{{ successMsg }}</strong>
-        </div>
-        <TextArea label="Property Details" placeholder="Enter property details..." :rows="5"
-          @on-update-text="(newValue) => (propertyDetails = newValue)"></TextArea>
-
-        <!-- Files Input -->
-        <div class="w-full text-center">
-          <UInput class="w-full" type="file" placeholder="Additional Files" accept=".pdf" multiple
-            icon="i-heroicons-document-duplicate" @change="handleFileChange" />
-          <div class="my-2 font-bold text-white-800" v-if="selectedFiles">
-            {{ selectedFiles.length }} File(s) Selected !
-          </div>
-        </div>
-
-        <TextArea label="Compose Email Prompt" placeholder="Enter email prompt..." :rows="5"
-          @on-update-text="(newValue) => (composeEmailPrompt = newValue)"></TextArea>
-
-        <label id="domains-number">Domains: </label>
-        <UInputNumber placeholder="Number of companies" id="domains-number" v-model="numberOfDomains" />
-
-        <UCheckbox v-model="dev" label="Test run" />
-
-        <div v-if="isLoading" class="flex justify-center">
-          <div class="loader"></div>
-        </div>
-        <div v-else class="flex flex-col sm:flex-row gap-4 pt-6 justify-center">
-          <Button @click="submitForm">
-            SUBMIT
-          </Button>
-        </div>
-      </form>
-
-      <!-- Logs Drawer Button -->
-      <div class="flex justify-center p-5">
-        <a :href="outputFile" download>Download</a>
-
-        <!-- <UButton label="Download" v-if="outputFile" @click="downloadFile()"></UButton> -->
-
-        <!-- <Button @click="drawerOpen = true" :disabled="drawerOpen">
-              <UIcon name="i-heroicons-bars-3-bottom-left-20-solid" class="mr-3 text-xl" />
-              <span class="ml-3 text-lg font-semibold text-center">Logs</span>
-            </Button> -->
-
-      </div>
-    </div>
-
-
-    <!-- Logging -->
-    <UDrawer title="Submitted Data Details" description="View and manage submitted property data and email prompts"
-      v-model:open="drawerOpen" :dismissible="false" :handle="false"
-      :ui="{ header: 'flex items-center justify-between' }">
-      <template #dialogtitle></template>
-      <template #description></template>
-      <template #header>
-        <h2 class="text-highlighted font-semibold"></h2>
-        <div>
-          <Button @click="getLogs"
-            customClass="bg-[0] text-white px-6 py-2 mr-3 rounded hover:bg-black hover:text-white border border-white transition cursor-pointer">
-            Refresh Logs
-          </Button>
-          <Button @click="clearLogs">Clear Logs</Button>
-          <UButton color="neutral" variant="ghost" icon="i-lucide-x" class="py-2 mt-[-15px] cursor-pointer"
-            @click="drawerOpen = false" />
-=======
       <!-- Buttons shown only during Lead generation -->
       <UButton
         block
@@ -102,7 +32,6 @@
         </div>
         <div v-if="successMsg" class="successMsg">
           <strong>{{ successMsg }}</strong>
->>>>>>> d7ac6e1093524b67cbe416f7aee9796dc96f84f1
         </div>
 
         <URadioGroup v-model="Togglervalue" :items="ToggleItems" />
@@ -114,7 +43,7 @@
           @on-update-text="(newValue) => (propertyDetails = newValue)"
         ></TextArea>
 
-        <UInput type="file" multiple @change="onFileChange" />
+        <UInput :disabled="!generateMail && Togglervalue?.toString() == 'selling'" type="file" multiple @change="onFileChange" />
 
         <!-- Total number to generate from Propert details -->
         <label id="domains-number" v-if="!generateMail">Domains: </label>
@@ -140,12 +69,6 @@
         <div v-if="isLoading" class="flex justify-center">
           <div class="loader"></div>
         </div>
-<<<<<<< HEAD
-        <div v-else class="p-6 text-white  font-mono break-words whitespace-pre-wrap">
-          {{ logs.length == 0 ? "Nothing to show!" : logs }}</div>
-      </template>
-    </UDrawer>
-=======
         <div v-else class="flex flex-col sm:flex-row gap-4 pt-6 justify-center">
           <Button @click="submitForm"> SUBMIT </Button>
         </div>
@@ -200,7 +123,6 @@
         </UDrawer>
       </div>
     </div>
->>>>>>> d7ac6e1093524b67cbe416f7aee9796dc96f84f1
   </div>
 </template>
 
@@ -263,32 +185,34 @@ async function submitForm() {
     return;
   }
   if (isLoading.value == true) {
-<<<<<<< HEAD
-    return
-=======
     return;
->>>>>>> d7ac6e1093524b67cbe416f7aee9796dc96f84f1
   }
   try {
     isLoading.value = true;
     await clearLogs();
     if (!generateMail.value) {
-      const data = await $fetch("api/get-leads", {
-        method: "POST",
-        body: fileData,
-        params: {
-          property_details: propertyDetails.value,
-<<<<<<< HEAD
-          compose_email_prompt: composeEmailPrompt.value,
-          test: dev.value,
-          number_of_domains: numberOfDomains.value,
-          docs: fileByteCodes.value
-=======
-          number_of_domains: numberOfDomains.value,
-          lead_type: Togglervalue.value,
->>>>>>> d7ac6e1093524b67cbe416f7aee9796dc96f84f1
-        },
-      });
+      let data = null;
+      if (Togglervalue.value == 'selling') {
+        console.log('getting sellers lead')
+        data = await $fetch("api/get-sellers-leads", {
+          method: "POST",
+          params: {
+            property_details: propertyDetails.value,
+            number_of_domains: numberOfDomains.value,
+          },
+        });
+      }
+      else if(Togglervalue.value == 'buying'){
+        data = await $fetch("api/get-leads", {
+          method: "POST",
+          body: fileData,
+          params: {
+            property_details: propertyDetails.value,
+            number_of_domains: numberOfDomains.value,
+            lead_type: Togglervalue.value,
+          },
+        });
+      }
       console.log("Response", data);
       showSuccessToast("Success", "AI lead generation done!");
       taskId.value = data;
@@ -318,11 +242,7 @@ async function submitForm() {
 
 const clearLogs = async () => {
   if (isLoading.value == true) {
-<<<<<<< HEAD
-    return
-=======
     return;
->>>>>>> d7ac6e1093524b67cbe416f7aee9796dc96f84f1
   }
   try {
     isLoading.value = true;
@@ -331,40 +251,21 @@ const clearLogs = async () => {
     })) as any;
     console.log("status : ", response);
   } catch (error) {
-<<<<<<< HEAD
-    console.error('Erreur de requete:', error);
-  } finally {
-    isLoading.value = false
-    await getLogs()
-=======
     console.error("Erreur de requete:", error);
   } finally {
     isLoading.value = false;
     await getLogs();
->>>>>>> d7ac6e1093524b67cbe416f7aee9796dc96f84f1
   }
 };
 
 const getLogs = async () => {
-<<<<<<< HEAD
-  if (isLoading.value == true) {
-    return
-  }
-=======
->>>>>>> d7ac6e1093524b67cbe416f7aee9796dc96f84f1
   try {
     const response = (await $fetch("/api/get-log", {
       method: "GET",
     })) as any;
     logs.value = response as any;
   } catch (error) {
-<<<<<<< HEAD
-    console.error('Erreur de requete:', error);
-  } finally {
-    isLoading.value = false
-=======
     console.error("Erreur de requete:", error);
->>>>>>> d7ac6e1093524b67cbe416f7aee9796dc96f84f1
   }
 };
 
@@ -381,50 +282,16 @@ const checkStatus = async () => {
     if (response.status === "running") {
       isLoading.value = true;
     } else if (response.status === "success") {
-<<<<<<< HEAD
-      outputFile.value = response.folder
-      isLoading.value = false
-    }
-    else {
-      isLoading.value = false
-=======
       isLoading.value = false;
       outputs.value = response.data;
     } else {
       isLoading.value = false;
->>>>>>> d7ac6e1093524b67cbe416f7aee9796dc96f84f1
     }
   } catch (error) {
     console.error("Erreur de requete:", error);
   }
 };
 
-<<<<<<< HEAD
-// Files
-const selectedFiles = ref<FileList | null>(null)
-const fileByteCodes = ref<Array<ArrayBuffer>>([])
-const handleFileChange = async (event: Event) => {
-  const inputElement = event.target as HTMLInputElement;
-  if (!inputElement.files) return;
-  selectedFiles.value = inputElement.files;
-  fileByteCodes.value = []; 
-  for (const file of Array.from(inputElement.files)) {
-    const byteCode = await readFileAsArrayBuffer(file);
-    fileByteCodes.value.push(byteCode);
-  }
-  console.log('Byte codes:', fileByteCodes.value);
-}
-// Get ArrayBuffer from file
-const readFileAsArrayBuffer = (file: File): Promise<ArrayBuffer> => {
-  return new Promise((resolve, reject) => {
-    const reader = new FileReader();
-    reader.onload = () => resolve(reader.result as ArrayBuffer);
-    reader.onerror = reject;
-    reader.readAsArrayBuffer(file);
-  });
-}
-
-=======
 const downloadOutput = async () => {
   try {
     if (!outputs.value) {
@@ -444,13 +311,10 @@ const downloadOutput = async () => {
     console.error("Download failed:", error);
   }
 };
->>>>>>> d7ac6e1093524b67cbe416f7aee9796dc96f84f1
 
 onMounted(() => {
   setInterval(checkStatus, 10000);
 });
-
-
 </script>
 
 <style>

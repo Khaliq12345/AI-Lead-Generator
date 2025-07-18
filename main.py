@@ -1,4 +1,3 @@
-from src.services import compose_email
 from src.api.app import start_app
 
 property_info = """ 
