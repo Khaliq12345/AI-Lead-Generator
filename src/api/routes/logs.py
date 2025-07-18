@@ -6,9 +6,9 @@ router = APIRouter(prefix="", responses={404: {"description": "Not found"}})
 
 # Get Logs
 @router.get("/get-log", response_model=str)
-async def get_log() -> str:
+def get_log() -> str:
     try:
-        value = await get_redis_values()
+        value = get_redis_values()
         return value
     except Exception as e:
         raise HTTPException(500, detail=str(e))
@@ -16,9 +16,9 @@ async def get_log() -> str:
 
 # Clear Logs
 @router.get("/clear-log", response_model=None)
-async def clear_log() -> str:
+def clear_log() -> str:
     try:
-        await flush_redis_db()
+        flush_redis_db()
         return "sucess"
     except Exception as e:
         raise HTTPException(500, detail=str(e))

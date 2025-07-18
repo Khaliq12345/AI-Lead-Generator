@@ -1,5 +1,16 @@
-export default defineEventHandler(async (event) => {
-    const storage = useStorage()
+import fs from "fs/promises"
 
-    console.log(storage.get('1749282152'))
+
+export default defineEventHandler(async (event) => {
+    const query = getQuery(event)
+    const filename = query.filename as string
+
+    const content = await fs.readFile(filename)
+    const bytes = new Uint8Array(content)
+
+    const blob = new Blob([bytes], {
+        "type": "application/zip"
+    })
+
+    return blob
 })

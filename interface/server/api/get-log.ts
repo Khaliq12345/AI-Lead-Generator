@@ -1,8 +1,7 @@
 export default defineEventHandler(async (event) => {
-  const query = getQuery(event)
   const baseUrl = useRuntimeConfig().public.API_BASE_URL as string
-  const url = `${baseUrl}/api/get-log`
-  const data = await $fetch(url, {
+  const data = await $fetch(event.path, {
+    baseURL: baseUrl,
     method: 'GET'
   })
 
