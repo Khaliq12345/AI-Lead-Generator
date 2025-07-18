@@ -27,3 +27,23 @@ class Lead(BaseModel):
 
 class Leads(BaseModel):
     leads: List[Lead]
+    
+
+class SellerLead(BaseModel):
+    Property: str
+    location: str
+    size: str
+    asset_class: str
+    last_listing: str
+    status: str
+    owner: str
+    contact: str
+    name: str
+    role: str
+    email: str
+    phone: str
+    website: str
+
+
+class SellerLeads(BaseModel):
+    leads: List[SellerLead]

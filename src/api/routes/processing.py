@@ -3,7 +3,7 @@ import os
 from pathlib import Path
 from typing import List, Optional
 from fastapi import APIRouter, HTTPException, BackgroundTasks, UploadFile
-from src.services.ai_analysis import get_leads
+from src.services.ai_analysis import get_leads, get_sellers_leads
 from src.services.compose_email import generate_lead_email
 from src.services.pdf_service import convert_image_to_pdf
 from PyPDF2 import PdfMerger
@@ -79,6 +79,27 @@ def get_lead_route(
             tasks=tasks,
             task_id=task_id,
             lead_type=lead_type.value,
+        )
+        return task_id
+    except Exception as e:
+        raise HTTPException(detail=str(e), status_code=500)
+    
+
+@router.post("/get-sellers-leads")
+def get_sellers_lead_route(
+    background_tasks: BackgroundTasks,
+    property_details,
+    number_of_domains,
+) -> Optional[str]:
+    task_id = str(int(datetime.now().timestamp()))
+    tasks[task_id] = {"status": "running", "data": None}
+    try:
+        background_tasks.add_task(
+            get_sellers_leads,
+            property_details=property_details,
+            number_of_domains=number_of_domains,
+            tasks=tasks,
+            task_id=task_id,
         )
         return task_id
     except Exception as e:

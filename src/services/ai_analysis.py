@@ -1,11 +1,10 @@
 import os
 import zipfile
 from pathlib import Path
-from src.services.get_emails import main_extract_domain
 from src.services.generate_company_domains import (
-    generate_company_domains,
     generate_email_leads,
 )
+from src.services.generate_sellers_leads import generate_sellers_email_leads
 from src.services.redis_services import set_redis_value
 
 
@@ -25,6 +24,36 @@ def folder_to_zip(folder: str | Path):
         file_path = os.path.join(folder, file)
         os.remove(file_path) if ".md" in file_path else None
 
+
+def get_sellers_leads(
+    tasks: dict,
+    task_id: str,
+    property_details: str,
+    number_of_domains: int = 10,
+) -> None:
+    outputs_text = ""
+    try:
+        set_redis_value(
+            "- Strating Analysis ... \n- Trying to get Company domains from provided property_details ..."
+        )
+        leads = generate_sellers_email_leads(
+            property_details,
+            number_of_domains=number_of_domains,
+        )
+        print(f"Got Leads {leads}")
+        for lead in leads:
+            for key in lead.keys(): # type: ignore
+                outputs_text += f"{key.capitalize()}: {lead[key]}\n"
+            outputs_text += "-------------\n"
+
+        tasks[task_id]["data"] = outputs_text
+        tasks[task_id]["status"] = "success"
+    except Exception as e:
+        print(f"Error - {e}")
+        set_redis_value(
+            f"----- Got Error : {str(e)}\n--------------- Analysis Unfortunately Ended  ---------------"
+        )
+        tasks[task_id]["status"] = "failed"
 
 def get_leads(
     tasks: dict,
@@ -59,7 +88,7 @@ def get_leads(
         #         f"----- Progress : {i + 1} / {len(company_domains)} ---> {100 * (i + 1) / len(company_domains)} %  -----"
         #     )
         for lead in leads:
-            for key in lead.keys():
+            for key in lead.keys(): # type: ignore
                 outputs_text += f"{key.capitalize()}: {lead[key]}\n"
             outputs_text += "-------------\n"
 

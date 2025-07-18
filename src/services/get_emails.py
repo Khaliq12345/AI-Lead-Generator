@@ -4,7 +4,7 @@ from src.core import config
 from typing import List, Dict
 from urllib.parse import urlparse
 
-from src.models.model import Lead, Leads
+from src.models.model import Leads
 from src.services.redis_services import set_redis_value
 from openai import OpenAI
 

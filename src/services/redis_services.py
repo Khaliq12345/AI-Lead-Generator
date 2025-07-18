@@ -16,7 +16,7 @@ def set_redis_value(text: str) -> None:
 # Get a redis value based on the key
 def get_redis_values() -> str:
     value = redis_client.get(log_key)
-    return value if value else ""
+    return str(value) if value else ""
 
 
 # Flush the current Redis DB

@@ -29,6 +29,6 @@ def start_app():
     uvicorn.run(
         "src.api.app:app",
         host="localhost",
-        port=8000,
+        port=8090,
         reload=ENV != "prod",
     )
