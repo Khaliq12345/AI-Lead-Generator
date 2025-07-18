@@ -25,24 +25,13 @@ def generate_sellers_email_leads(
     - Return companies or executives that do not exist.
     - Invent or modify data.
     - Include brokers or non-investment personnel.
-    Example Prompt:
-    Show me off-market shopping centers in New Jersey that were listed from 2021 to 2023 but never sold.
-    Expected Output Format (for each match):
-    - Company Name: [Name]
-    - Website: [www.companydomain.com]
-    - Executive Name: [Full Name]
-    - Role: [Title related to acquisitions or investments]
-    - Email: [Verified email]
-    - Phone: [If available]
-    Here is the property description:
-    {property_details}
     """.strip()
     try:
         contents = []
         contents.append(
             {
                 "type": "text",
-                "text": "Show me off-market shopping centers in New Jersey that were listed from 2021 to 2023 but never sold.",
+                "text": property_details,
             }
         )
         completion = client.beta.chat.completions.parse(
@@ -70,4 +59,3 @@ def generate_sellers_email_leads(
             f"----- Got Error while generating company domains : {str(e)}"
         )
         return []
-

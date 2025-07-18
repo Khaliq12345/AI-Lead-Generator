@@ -27,10 +27,10 @@ class Lead(BaseModel):
 
 class Leads(BaseModel):
     leads: List[Lead]
-    
+
 
 class SellerLead(BaseModel):
-    Property: str
+    property: str
     location: str
     size: str
     asset_class: str
