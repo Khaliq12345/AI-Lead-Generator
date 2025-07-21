@@ -32,6 +32,7 @@ class Leads(BaseModel):
 class SellerLead(BaseModel):
     property: str
     location: str
+    address: str
     size: str
     asset_class: str
     last_listing: str
