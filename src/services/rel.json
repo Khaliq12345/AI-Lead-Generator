@@ -1,0 +1,97 @@
+{
+    "cookies": [
+        {
+            "name": "_ga",
+            "value": "GA1.1.1290757974.1756170660",
+            "domain": ".rel.network",
+            "path": "/",
+            "expires": 1790730659.798723,
+            "httpOnly": false,
+            "secure": false,
+            "sameSite": "Lax"
+        },
+        {
+            "name": "_gcl_au",
+            "value": "1.1.2062941438.1756170660",
+            "domain": ".rel.network",
+            "path": "/",
+            "expires": 1763946660,
+            "httpOnly": false,
+            "secure": false,
+            "sameSite": "Lax"
+        },
+        {
+            "name": "_ga_DRYZCDM4P7",
+            "value": "GS2.1.s1756170659$o1$g1$t1756170684$j35$l0$h0",
+            "domain": ".rel.network",
+            "path": "/",
+            "expires": 1790730684.171417,
+            "httpOnly": false,
+            "secure": false,
+            "sameSite": "Lax"
+        },
+        {
+            "name": "_ga_ZJZY13M1V8",
+            "value": "GS2.1.s1756170659$o1$g1$t1756170684$j35$l0$h0",
+            "domain": ".rel.network",
+            "path": "/",
+            "expires": 1790730684.176826,
+            "httpOnly": false,
+            "secure": false,
+            "sameSite": "Lax"
+        },
+        {
+            "name": "_lr_hb_-8h64nz%2Frel",
+            "value": "{%22heartbeat%22:1756193919283}",
+            "domain": "www.rel.network",
+            "path": "/",
+            "expires": 1756280319,
+            "httpOnly": false,
+            "secure": false,
+            "sameSite": "Lax"
+        },
+        {
+            "name": "sb-qyvtmnzmpitejlgpxhci-auth-token",
+            "value": "%7B%22access_token%22%3A%22eyJhbGciOiJIUzI1NiIsImtpZCI6IktpWkVya2VXUHh4Nm1KRGgiLCJ0eXAiOiJKV1QifQ.eyJpc3MiOiJodHRwczovL3F5dnRtbnptcGl0ZWpsZ3B4aGNpLnN1cGFiYXNlLmNvL2F1dGgvdjEiLCJzdWIiOiI5YWI2MWI0MS02MTQ0LTQ4MGYtODkxNS01NGMxZGFmOGJmYTUiLCJhdWQiOiJhdXRoZW50aWNhdGVkIiwiZXhwIjoxNzU2MTk3NTE5LCJpYXQiOjE3NTYxOTM5MTksImVtYWlsIjoiIiwicGhvbmUiOiIxNjQ2NTI4MDA0MCIsImFwcF9tZXRhZGF0YSI6eyJwcm92aWRlciI6InBob25lIiwicHJvdmlkZXJzIjpbInBob25lIl19LCJ1c2VyX21ldGFkYXRhIjp7ImVtYWlsIjoidGdAaGlnaGNhcGdyb3VwLmNvbSIsImVtYWlsX3ZlcmlmaWVkIjpmYWxzZSwiZmlzdF9uYW1lIjoiVHkiLCJpbnZpdGUiOiI0NWRhMGE4ZC1jNjRlLTRhN2YtYWJkMi0wM2NlOTFiN2YwODEiLCJuYW1lIjoiVHkiLCJwaG9uZSI6IjE2NDY1MjgwMDQwIiwicGhvbmVfdmVyaWZpZWQiOmZhbHNlLCJzdWIiOiI5YWI2MWI0MS02MTQ0LTQ4MGYtODkxNS01NGMxZGFmOGJmYTUifSwicm9sZSI6ImF1dGhlbnRpY2F0ZWQiLCJhYWwiOiJhYWwxIiwiYW1yIjpbeyJtZXRob2QiOiJvdHAiLCJ0aW1lc3RhbXAiOjE3NTYxNzA2NTV9XSwic2Vzc2lvbl9pZCI6IjAxMWM4NjQyLTYzNWItNGFhNC05NDQ3LTdkMWI3YTBkMTQ3OCIsImlzX2Fub255bW91cyI6ZmFsc2V9.k8PDXe1GhR9syBAzkUI7ejDOpjpUffJkyO50-wIvRvM%22%2C%22token_type%22%3A%22bearer%22%2C%22expires_in%22%3A3600%2C%22expires_at%22%3A1756197519%2C%22refresh_token%22%3A%227l6tfyktjc6q%22%2C%22user%22%3A%7B%22id%22%3A%229ab61b41-6144-480f-8915-54c1daf8bfa5%22%2C%22aud%22%3A%22authenticated%22%2C%22role%22%3A%22authenticated%22%2C%22email%22%3A%22%22%2C%22phone%22%3A%2216465280040%22%2C%22phone_confirmed_at%22%3A%222025-08-26T01%3A10%3A55.755442Z%22%2C%22confirmation_sent_at%22%3A%222025-08-26T01%3A08%3A10.411992Z%22%2C%22confirmed_at%22%3A%222025-08-26T01%3A10%3A55.755442Z%22%2C%22last_sign_in_at%22%3A%222025-08-26T01%3A10%3A55.759772Z%22%2C%22app_metadata%22%3A%7B%22provider%22%3A%22phone%22%2C%22providers%22%3A%5B%22phone%22%5D%7D%2C%22user_metadata%22%3A%7B%22email%22%3A%22tg%40highcapgroup.com%22%2C%22email_verified%22%3Afalse%2C%22fist_name%22%3A%22Ty%22%2C%22invite%22%3A%2245da0a8d-c64e-4a7f-abd2-03ce91b7f081%22%2C%22name%22%3A%22Ty%22%2C%22phone%22%3A%2216465280040%22%2C%22phone_verified%22%3Afalse%2C%22sub%22%3A%229ab61b41-6144-480f-8915-54c1daf8bfa5%22%7D%2C%22identities%22%3A%5B%7B%22identity_id%22%3A%22b9d14353-b85e-42e7-848d-a29d27f565c2%22%2C%22id%22%3A%229ab61b41-6144-480f-8915-54c1daf8bfa5%22%2C%22user_id%22%3A%229ab61b41-6144-480f-8915-54c1daf8bfa5%22%2C%22identity_data%22%3A%7B%22email%22%3A%22tg%40highcapgroup.com%22%2C%22email_verified%22%3Afalse%2C%22fist_name%22%3A%22Ty%22%2C%22invite%22%3A%2245da0a8d-c64e-4a7f-abd2-03ce91b7f081%22%2C%22name%22%3A%22Ty%22%2C%22phone%22%3A%2216465280040%22%2C%22phone_verified%22%3Afalse%2C%22sub%22%3A%229ab61b41-6144-480f-8915-54c1daf8bfa5%22%7D%2C%22provider%22%3A%22phone%22%2C%22last_sign_in_at%22%3A%222024-10-30T15%3A50%3A52.973661Z%22%2C%22created_at%22%3A%222024-10-30T15%3A50%3A52.973713Z%22%2C%22updated_at%22%3A%222024-10-30T15%3A50%3A52.973713Z%22%2C%22email%22%3A%22tg%40highcapgroup.com%22%7D%5D%2C%22created_at%22%3A%222024-10-30T15%3A50%3A52.963883Z%22%2C%22updated_at%22%3A%222025-08-26T07%3A38%3A35.679142Z%22%2C%22is_anonymous%22%3Afalse%7D%7D",
+            "domain": "www.rel.network",
+            "path": "/",
+            "expires": 1790753919.543272,
+            "httpOnly": false,
+            "secure": false,
+            "sameSite": "Lax"
+        },
+        {
+            "name": "_lr_tabs_-8h64nz%2Frel",
+            "value": "{%22recordingID%22:%226-0198e550-9127-719d-9ff5-bcd1c60c6bf3%22%2C%22sessionID%22:0%2C%22lastActivity%22:1756193952910%2C%22hasActivity%22:true%2C%22confirmed%22:true%2C%22clearsIdentifiedUser%22:false}",
+            "domain": "www.rel.network",
+            "path": "/",
+            "expires": 1756280352,
+            "httpOnly": false,
+            "secure": false,
+            "sameSite": "Lax"
+        }
+    ],
+    "origins": [
+        {
+            "origin": "https://www.rel.network",
+            "localStorage": [
+                {
+                    "name": "_gcl_ls",
+                    "value": "{\"schema\":\"gcl\",\"version\":1,\"gcl_ctr\":{\"value\":{\"value\":0,\"creationTimeMs\":1756170660230},\"expires\":1763946660230}}"
+                },
+                {
+                    "name": "selectedNewsFilters",
+                    "value": "{\"selectedOptions\":[]}"
+                },
+                {
+                    "name": "mapbox.eventData.uuid:",
+                    "value": "c2026e7b-4478-4cca-b391-71bbdba11968"
+                },
+                {
+                    "name": "_lr_id_",
+                    "value": "{\"userID\":\"dfaaf286-2677-4fdf-a008-d695f92ba154\"}"
+                }
+            ]
+        }
+    ]
+}
