@@ -1,3 +1,4 @@
+from datetime import datetime
 from playwright.sync_api import (
     sync_playwright,
 )
@@ -9,7 +10,12 @@ TIMEOUT = 60000
 
 
 def save_data(extracted_data: dict) -> str | None:
-    output_file = "output.csv"
+    uid = str(int(datetime.now().timestamp()))
+    project_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    outputs_dir = os.path.join(project_root, "outputs")
+    os.makedirs(outputs_dir, exist_ok=True)
+    filename = f"output_{uid}.csv"
+    output_file = os.path.join(outputs_dir, filename)
     if not extracted_data:
         return None
     df = pd.DataFrame([extracted_data])
@@ -23,7 +29,10 @@ def save_data(extracted_data: dict) -> str | None:
 def extract_data(
     html_source: str,
 ) -> str | None:
-    extracted_data = {}
+    extracted_data = {
+        "title": "hello",
+        "content": "world",
+    }
     tree = HTMLParser(html_source)
     if not tree:
         return None
@@ -39,18 +48,17 @@ def run(
     url: str,
 ) -> str | None:
     with sync_playwright() as p:
-        browser = p.chromium.launch(headless=False)
-        if os.path.exists("rel.json"):
-            context = browser.new_context(storage_state="rel.json")
-        else:
-            return None
+        browser = p.firefox.launch(headless=False)
+        current_dir = os.path.dirname(__file__)
+        json_path = os.path.join(current_dir, "rel.json")
+        context = browser.new_context(storage_state=json_path)
         page = context.new_page()
         page.goto(url, timeout=TIMEOUT)
         page.wait_for_load_state("load", timeout=TIMEOUT)
         html_source = page.content()
         # Extract Data
         result = extract_data(html_source)
-        context.storage_state(path="rel.json")
+        context.storage_state(path=json_path)
         browser.close()
         return result
 

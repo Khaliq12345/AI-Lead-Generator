@@ -137,4 +137,4 @@ def generate_mail(
 
 @router.get("/check-status")
 def check_status(task_id: str) -> Optional[dict]:
-    return tasks.get(task_id)
+    return tasks.get(task_id) 
