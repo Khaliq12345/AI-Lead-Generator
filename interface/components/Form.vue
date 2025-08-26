@@ -1,6 +1,12 @@
 <template>
   <div class="min-h-screen bg-black py-10 px-4">
     <div class="max-w-5xl mx-auto bg-[#1c1c1e] rounded-md shadow-lg p-10">
+      <div class="flex justify-end my-3 p-5">
+        <!-- Download Button -->
+        <UButton to="/scraper" 
+          >Scraper</UButton
+        >
+      </div>
       <h1
         class="text-3xl font-semibold text-center text-black bg-white bg-opacity-10 py-4 rounded-md mb-10"
       >

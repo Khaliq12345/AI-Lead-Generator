@@ -1,5 +1,4 @@
 from fastapi import APIRouter, HTTPException
-from fastapi.responses import FileResponse
 from src.services.scraper_service import run
 import os
 
@@ -15,14 +14,12 @@ def scrap_link(url: str):
         file_path = os.path.abspath(file_path)
         if not os.path.isfile(file_path):
             raise HTTPException(400, detail="Unable to Find Session File rel.json")
+        print("here")
         output_path = run(url)
         if not output_path:
             raise HTTPException(400, detail=f"Unable to Scrape the url : {url}")
-        # return output_path
-        return FileResponse(
-        path=file_path,
-        filename=output_path,
-        media_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
-    )
+        with open(output_path, "r") as f:
+            content = f.read()
+            return content
     except Exception as e:
         raise HTTPException(500, detail=str(e))
