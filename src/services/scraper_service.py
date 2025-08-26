@@ -38,6 +38,9 @@ def extract_data(
 def run(
     url: str,
 ) -> str | None:
+    base_dir = os.path.dirname(os.path.abspath(__file__))
+    csv_path = os.path.join(base_dir, 'test.csv')
+    return csv_path
     with sync_playwright() as p:
         browser = p.chromium.launch(headless=False)
         if os.path.exists("rel.json"):

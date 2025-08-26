@@ -70,10 +70,9 @@ async function submitForm() {
             },
         })) as any;
         console.log("Result - ", response);
-        outputs.value = await response.blob(); 
+        outputs.value = await response; 
         showToast("Success", "Scraping Successfully done !", 'success');
         isLoading.value = false;
-
     } catch (e) {
         console.error("Une erreur inattendue s'est produite :", e);
         showToast("Error", `Scraping Error ${e}`, 'error');
