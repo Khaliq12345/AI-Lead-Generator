@@ -1,8 +1,5 @@
-from datetime import datetime
 from playwright.sync_api import sync_playwright, Page
 import os
-import pandas as pd
-from selectolax.parser import HTMLParser
 
 TIMEOUT = 60000
 
@@ -67,61 +64,27 @@ def get_main_data(page: Page):
     return data
 
 
-def save_data(extracted_data_list) -> str | None:
-    uid = str(int(datetime.now().timestamp()))
-    project_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-    outputs_dir = os.path.join(project_root, "outputs")
-    os.makedirs(outputs_dir, exist_ok=True)
-    filename = f"output_{uid}.csv"
-    output_file = os.path.join(outputs_dir, filename)
-    if not extracted_data_list:
-        return None
-    df = pd.DataFrame(extracted_data_list)
-    if os.path.isfile(output_file):
-        df.to_csv(output_file, mode="a", header=False, index=False, encoding="utf-8")
-    else:
-        df.to_csv(output_file, mode="w", header=True, index=False, encoding="utf-8")
-    return output_file
-
-
-def extract_data(
-    html_source: str,
-) -> str | None:
-    extracted_data = {
-        "title": "hello",
-        "content": "world",
-    }
-    tree = HTMLParser(html_source)
-    if not tree:
-        return None
-    #
-    # Extract Needed Data
-    #
-    # Save Data
-    result = save_data(extracted_data)
-    return result
-
-
 def run(
     url: str,
-) -> str | None:
+):
     with sync_playwright() as p:
-        browser = p.firefox.launch(headless=False)
-        current_dir = os.path.dirname(__file__)
-        json_path = os.path.join(current_dir, "rel.json")
-        context = browser.new_context(storage_state=json_path)
-        page = context.new_page()
-        page.goto(url, timeout=TIMEOUT)
-        page.wait_for_load_state("load", timeout=TIMEOUT)
-        final_list = []
-        #
-        # Common Data from the first page
-        common_data = get_main_data(page)
-        # print(f"Common data : {common_data}")
-        span = page.locator("nav[aria-label='Tabs'] span", has_text="Ownership")
-
-        # Ownership Button
-        if span.count() > 0:
+        try:
+            browser = p.firefox.launch(headless=False)
+            current_dir = os.path.dirname(__file__)
+            json_path = os.path.join(current_dir, "rel.json")
+            context = browser.new_context(storage_state=json_path)
+            page = context.new_page()
+            page.goto(url, timeout=TIMEOUT)
+            page.wait_for_load_state("load", timeout=TIMEOUT)
+            final_list = []
+            #
+            # Common Data from the first page
+            common_data = get_main_data(page)
+            # print(f"Common data : {common_data}")
+            span = page.locator("nav[aria-label='Tabs'] span", has_text="Ownership")
+            # Ownership Button
+            if span.count() < 0:
+                return []
             print("Got Ownership Btn")
             span.first.click()
             print("Clicked")
@@ -150,12 +113,13 @@ def run(
                 here_data["Adresses"] = cols[4].text_content()
                 # print(f"Got {len(cols)} Cols : {here_data}")
                 final_list.append(here_data)
-        print("Process ended !!!")
-        result = save_data(final_list)
-        print("Output Wrote")
-        context.storage_state(path=json_path)
-        browser.close()
-        return result
+            print("Process ended !!!")
+            context.storage_state(path=json_path)
+            browser.close()
+            return final_list
+        except Exception as e:
+            print(f"Error {e}")
+            return []
 
 
 if __name__ == "__main__":
