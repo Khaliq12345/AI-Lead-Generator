@@ -1,11 +1,9 @@
 <template>
   <div class="min-h-screen bg-black py-10 px-4">
     <div class="max-w-5xl mx-auto bg-[#1c1c1e] rounded-md shadow-lg p-10">
-       <div class="flex justify-end my-3 p-5">
+      <div class="flex justify-end my-3 p-5">
         <!-- Download Button -->
-        <UButton to="/" 
-          >Home</UButton
-        >
+        <UButton to="/">Home</UButton>
       </div>
       <h1
         class="text-3xl font-semibold text-center text-black bg-white bg-opacity-10 py-4 rounded-md mb-10"
@@ -42,6 +40,8 @@
 </template>
 
 <script setup lang="ts">
+import * as XLSX from "xlsx";
+
 const site_url: Ref<string> = ref("");
 const errorMsg = ref("");
 const successMsg = ref("");
@@ -76,6 +76,15 @@ async function submitForm() {
       },
     })) as any;
     console.log("Result - ", response);
+    if (
+      !Array.isArray(response) ||
+      (Array.isArray(response) && response.length === 0)
+    ) {
+      console.error("No Data to Doownload");
+      showToast("Error", "No Data returned !", "error");
+      isLoading.value = false;
+      return;
+    }
     outputs.value = await response;
     showToast("Success", "Scraping Successfully done !", "success");
     isLoading.value = false;
@@ -87,11 +96,27 @@ async function submitForm() {
 }
 const downloadOutput = async () => {
   try {
-    const filename = "result.csv";
-    const csvBlob = new Blob([outputs.value], {
-      type: "text/csv;charset=utf-8;",
+    // Convertir la liste de JSON en format XLSX
+    const jsonToXlsx = (jsonData: any[]) => {
+      // Créer un classeur Excel à partir des données JSON
+      const ws = XLSX.utils.json_to_sheet(jsonData);
+      const wb = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(wb, ws, "Sheet1");
+      return wb;
+    };
+    // Convertir la donnée JSON en format XLSX
+    const wb = jsonToXlsx(outputs.value);
+    // Créer un Blob pour le fichier .xlsx
+    const filename = "result.xlsx";
+    const xlsxBlob = XLSX.write(wb, {
+      bookType: "xlsx",
+      type: "array",
     });
-    const fileURL = window.URL.createObjectURL(csvBlob);
+    // Créer un URL pour télécharger le fichier
+    const fileURL = window.URL.createObjectURL(
+      new Blob([xlsxBlob], { type: "application/octet-stream" })
+    );
+    // Créer un lien de téléchargement et simuler un clic pour lancer le téléchargement
     const a = document.createElement("a");
     a.href = fileURL;
     a.download = filename;
