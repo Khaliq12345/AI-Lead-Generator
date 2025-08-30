@@ -1,5 +1,6 @@
 from playwright.sync_api import sync_playwright, Page
-import os
+
+from src.core import config
 
 TIMEOUT = 60000
 
@@ -66,13 +67,12 @@ def get_main_data(page: Page):
 
 def run(
     url: str,
+    headless: bool
 ):
     with sync_playwright() as p:
         try:
-            browser = p.firefox.launch(headless=False)
-            current_dir = os.path.dirname(__file__)
-            json_path = os.path.join(current_dir, "rel.json")
-            context = browser.new_context(storage_state=json_path)
+            browser = p.firefox.launch(headless=headless)
+            context = browser.new_context(storage_state=config.REL_PATH)
             page = context.new_page()
             page.goto(url, timeout=TIMEOUT)
             page.wait_for_load_state("load", timeout=TIMEOUT)
@@ -102,19 +102,22 @@ def run(
             for row in rows[1:]:
                 cols = row.query_selector_all("> div")
                 here_data = common_data.copy()
-                here_data["Owner_Name"] = cols[0].text_content()
-                here_data["Company"] = cols[1].text_content()
+                # Owner Name
+                here_data["Owner Name"] = cols[0].text_content()
+                # Company
+                here_data["Company"] =  " -- ".join([(tmp.text_content() or "").strip() for tmp in (cols[1].query_selector_all("> div") or [])])
                 here_data["Phone"] = (
-                    cols[2].text_content() if cols[2].text_content() != "Search" else ""
+                    (" -- ".join([(tmp.text_content() or "").strip() for tmp in (cols[2].query_selector_all("a") or [])])) if cols[2].text_content() != "Search" else ""
                 )
                 here_data["Email"] = (
-                    cols[3].text_content() if cols[3].text_content() != "Search" else ""
+                    (" -- ".join([(tmp.text_content() or "").strip() for tmp in (cols[3].query_selector_all("a") or [])])) if cols[3].text_content() != "Search" else ""
                 )
                 here_data["Adresses"] = cols[4].text_content()
                 # print(f"Got {len(cols)} Cols : {here_data}")
                 final_list.append(here_data)
             print("Process ended !!!")
-            context.storage_state(path=json_path)
+            # page.pause()
+            context.storage_state(path=config.REL_PATH)
             browser.close()
             return final_list
         except Exception as e:
@@ -123,4 +126,4 @@ def run(
 
 
 if __name__ == "__main__":
-    run("")
+    run("", False)
