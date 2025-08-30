@@ -1,11 +1,9 @@
 <template>
   <div class="min-h-screen bg-black py-10 px-4">
     <div class="max-w-5xl mx-auto bg-[#1c1c1e] rounded-md shadow-lg p-10">
-       <div class="flex justify-end my-3 p-5">
+      <div class="flex justify-end my-3 p-5">
         <!-- Download Button -->
-        <UButton to="/" 
-          >Home</UButton
-        >
+        <UButton to="/">Home</UButton>
       </div>
       <h1
         class="text-3xl font-semibold text-center text-black bg-white bg-opacity-10 py-4 rounded-md mb-10"
@@ -32,6 +30,7 @@
       </form>
 
       <div class="flex justify-start p-5">
+
         <!-- Download Button -->
         <UButton @click="downloadOutput()" :disabled="!outputs"
           >Download</UButton
@@ -76,6 +75,12 @@ async function submitForm() {
       },
     })) as any;
     console.log("Result - ", response);
+    if (!Array.isArray(response) || (Array.isArray(response) && response.length === 0)) {
+      console.error("No Data to Doownload");
+      showToast("Error", "No Data returned !", "error");
+      isLoading.value = false;
+      return;
+    }
     outputs.value = await response;
     showToast("Success", "Scraping Successfully done !", "success");
     isLoading.value = false;
@@ -87,8 +92,22 @@ async function submitForm() {
 }
 const downloadOutput = async () => {
   try {
+    // Convertir la liste de JSON en CSV
+    const jsonToCsv = (jsonData: any[]) => {
+      const headers = Object.keys(jsonData[0]);
+      const rows = jsonData.map((obj) => headers.map((header) => obj[header]));
+      // Construire le CSV
+      const csvContent = [
+        headers.join(";"), // Entêtes de colonnes
+        ...rows.map((row) => row.join(";")), // Données
+      ].join("\n");
+
+      return csvContent;
+    };
+    // Convertir la donnée JSON en CSV
+    const csvContent = jsonToCsv(outputs.value);
     const filename = "result.csv";
-    const csvBlob = new Blob([outputs.value], {
+    const csvBlob = new Blob([csvContent], {
       type: "text/csv;charset=utf-8;",
     });
     const fileURL = window.URL.createObjectURL(csvBlob);
