@@ -9,11 +9,11 @@ router = APIRouter(prefix="", responses={404: {"description": "Not found"}})
 
 # Start Scraping
 @router.get("/scrape-link", response_model=str)
-def scrap_link(url: str):
+def scrap_link(url: str, headless: bool = True):
     try:
         if not os.path.isfile(config.REL_PATH or ""):
             raise HTTPException(400, detail="Unable to Find Session File rel.json")
-        content = run(url)
+        content = run(url, headless)
         return JSONResponse(content=content)
     except Exception as e:
         raise HTTPException(500, detail=str(e))
