@@ -3,3 +3,7 @@
 .env
 __pycache__/
 outputs
+rel.json
+./src/services/rel.json
+test*.*
+output.csv
