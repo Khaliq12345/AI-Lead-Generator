@@ -30,7 +30,6 @@
       </form>
 
       <div class="flex justify-start p-5">
-
         <!-- Download Button -->
         <UButton @click="downloadOutput()" :disabled="!outputs"
           >Download</UButton
@@ -41,6 +40,8 @@
 </template>
 
 <script setup lang="ts">
+import * as XLSX from "xlsx";
+
 const site_url: Ref<string> = ref("");
 const errorMsg = ref("");
 const successMsg = ref("");
@@ -75,7 +76,10 @@ async function submitForm() {
       },
     })) as any;
     console.log("Result - ", response);
-    if (!Array.isArray(response) || (Array.isArray(response) && response.length === 0)) {
+    if (
+      !Array.isArray(response) ||
+      (Array.isArray(response) && response.length === 0)
+    ) {
       console.error("No Data to Doownload");
       showToast("Error", "No Data returned !", "error");
       isLoading.value = false;
@@ -92,25 +96,27 @@ async function submitForm() {
 }
 const downloadOutput = async () => {
   try {
-    // Convertir la liste de JSON en CSV
-    const jsonToCsv = (jsonData: any[]) => {
-      const headers = Object.keys(jsonData[0]);
-      const rows = jsonData.map((obj) => headers.map((header) => obj[header]));
-      // Construire le CSV
-      const csvContent = [
-        headers.join(";"), // Entêtes de colonnes
-        ...rows.map((row) => row.join(";")), // Données
-      ].join("\n");
-
-      return csvContent;
+    // Convertir la liste de JSON en format XLSX
+    const jsonToXlsx = (jsonData: any[]) => {
+      // Créer un classeur Excel à partir des données JSON
+      const ws = XLSX.utils.json_to_sheet(jsonData);
+      const wb = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(wb, ws, "Sheet1");
+      return wb;
     };
-    // Convertir la donnée JSON en CSV
-    const csvContent = jsonToCsv(outputs.value);
-    const filename = "result.csv";
-    const csvBlob = new Blob([csvContent], {
-      type: "text/csv;charset=utf-8;",
+    // Convertir la donnée JSON en format XLSX
+    const wb = jsonToXlsx(outputs.value);
+    // Créer un Blob pour le fichier .xlsx
+    const filename = "result.xlsx";
+    const xlsxBlob = XLSX.write(wb, {
+      bookType: "xlsx",
+      type: "array",
     });
-    const fileURL = window.URL.createObjectURL(csvBlob);
+    // Créer un URL pour télécharger le fichier
+    const fileURL = window.URL.createObjectURL(
+      new Blob([xlsxBlob], { type: "application/octet-stream" })
+    );
+    // Créer un lien de téléchargement et simuler un clic pour lancer le téléchargement
     const a = document.createElement("a");
     a.href = fileURL;
     a.download = filename;
