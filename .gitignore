@@ -6,4 +6,4 @@ outputs
 rel.json
 src/services/rel.json
 test*.*
-output.csv
+output*
