@@ -1,8 +1,78 @@
 from playwright.sync_api import sync_playwright, Page
+import os
+from datetime import datetime
+import pandas as pd
 
 from src.core import config
+import csv
+
+def has_property_link(value: str) -> bool:
+    project_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    outputs_dir = os.path.join(project_root, "outputs")
+    filename = "output_beta.csv"
+    file_path = os.path.join(outputs_dir, filename) 
+    if not os.path.isfile(file_path):
+        print(f"Fichier introuvable : {file_path}")
+        return False
+    try:
+        with open(file_path, newline='', encoding='utf-8') as csvfile:
+            reader = csv.DictReader(csvfile)
+            for row in reader:
+                if row.get("Property Link") == value:
+                    return True
+        return False
+    except Exception as e:
+        print(f"Erreur lors de la lecture du fichier : {e}")
+        return False
 
 TIMEOUT = 60000
+
+
+def save_data2(extracted_data_list) -> str | None:
+    uid = str(int(datetime.now().timestamp()))
+    project_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    outputs_dir = os.path.join(project_root, "outputs")
+    os.makedirs(outputs_dir, exist_ok=True)
+    filename = "output_beta.csv" # f"output_{uid}.csv"
+    output_file = os.path.join(outputs_dir, filename)
+    if not extracted_data_list:
+        return None
+    df = pd.DataFrame(extracted_data_list)
+    if os.path.isfile(output_file):
+        df.to_csv(output_file, mode="a", header=False, index=False, encoding="utf-8")
+    else:
+        df.to_csv(output_file, mode="w", header=True, index=False, encoding="utf-8")
+    return output_file
+
+
+def save_data(extracted_data_list) -> str | None:
+    if not extracted_data_list:
+        return None
+
+    project_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    outputs_dir = os.path.join(project_root, "outputs")
+    os.makedirs(outputs_dir, exist_ok=True)
+
+    filename = "output_beta2.csv"
+    output_file = os.path.join(outputs_dir, filename)
+
+    # Convertir la nouvelle data en DataFrame
+    new_df = pd.DataFrame(extracted_data_list)
+
+    if os.path.isfile(output_file):
+        # Charger l'ancien fichier
+        old_df = pd.read_csv(output_file, encoding="utf-8")
+
+        # Concaténer et réaligner les colonnes (remplit NaN pour colonnes manquantes)
+        combined_df = pd.concat([old_df, new_df], ignore_index=True)
+
+        # Réécrire le fichier complet avec nouveau header
+        combined_df.to_csv(output_file, index=False, encoding="utf-8")
+    else:
+        # Première écriture
+        new_df.to_csv(output_file, index=False, encoding="utf-8")
+
+    return output_file
 
 
 def get_main_data(page: Page):
@@ -106,12 +176,23 @@ def run(headless: bool):
             #
             # For each Property
             #
-            for p in property_lst:
-                page.goto(p, timeout=TIMEOUT)
-                page.wait_for_load_state("load", timeout=TIMEOUT)
+            for index,p in enumerate(property_lst):
+                print(f"Scraping link {index+1} / {len(property_lst)}")
+                if has_property_link(p):
+                    continue
+                try:
+                    page.goto(p, timeout=TIMEOUT)
+                    page.wait_for_load_state("load", timeout=TIMEOUT)
+                except Exception as e:
+                    print("Unable to load")
+                    continue
                 #
                 # Common Data from the first page
-                common_data = get_main_data(page)
+                try:
+                    common_data = get_main_data(page)
+                    common_data["Property Link"] = p
+                except Exception as e:
+                    continue
                 # print(f"Common data : {common_data}")
                 span = page.locator("nav[aria-label='Tabs'] span", has_text="Ownership")
                 # Ownership Button
@@ -168,9 +249,11 @@ def run(headless: bool):
                     #
                     here_data["Adresses"] = cols[4].text_content()
                     # print(f"Got {len(cols)} Cols : {here_data}")
+                    save_data([here_data])
                     final_list.append(here_data)
             print("Process ended !!!")
-            print(final_list)
+            # print(final_list)
+            # save_data(final_list)
             # page.pause()
             context.storage_state(path=config.REL_PATH)
             browser.close()
