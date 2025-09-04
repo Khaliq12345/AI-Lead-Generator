@@ -1,78 +1,50 @@
 from playwright.sync_api import sync_playwright, Page
 import os
-from datetime import datetime
+
+# from datetime import datetime
 import pandas as pd
-
 from src.core import config
-import csv
 
-def has_property_link(value: str) -> bool:
-    project_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-    outputs_dir = os.path.join(project_root, "outputs")
-    filename = "output_beta.csv"
-    file_path = os.path.join(outputs_dir, filename) 
-    if not os.path.isfile(file_path):
-        print(f"Fichier introuvable : {file_path}")
-        return False
-    try:
-        with open(file_path, newline='', encoding='utf-8') as csvfile:
-            reader = csv.DictReader(csvfile)
-            for row in reader:
-                if row.get("Property Link") == value:
-                    return True
-        return False
-    except Exception as e:
-        print(f"Erreur lors de la lecture du fichier : {e}")
-        return False
-
+project_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+outputs_dir = os.path.join(project_root, "outputs")
+file_path = os.path.join(outputs_dir, "output_beta.csv")
 TIMEOUT = 60000
 
 
-def save_data2(extracted_data_list) -> str | None:
-    uid = str(int(datetime.now().timestamp()))
-    project_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-    outputs_dir = os.path.join(project_root, "outputs")
-    os.makedirs(outputs_dir, exist_ok=True)
-    filename = "output_beta.csv" # f"output_{uid}.csv"
-    output_file = os.path.join(outputs_dir, filename)
-    if not extracted_data_list:
-        return None
-    df = pd.DataFrame(extracted_data_list)
-    if os.path.isfile(output_file):
-        df.to_csv(output_file, mode="a", header=False, index=False, encoding="utf-8")
-    else:
-        df.to_csv(output_file, mode="w", header=True, index=False, encoding="utf-8")
-    return output_file
+def get_existing_property_links() -> list[str]:
+    if not os.path.isfile(file_path):
+        print(f"Fichier introuvable : {file_path}")
+        return []
+    try:
+        df = pd.read_csv(file_path, encoding="utf-8")
+        if "Property Link" not in df.columns:
+            print("Colonne 'Property Link' absente dans le fichier.")
+            return []
+        return df["Property Link"].dropna().unique().tolist()
+    except Exception as e:
+        print(f"Erreur lors de la lecture du fichier : {e}")
+        return []
 
 
 def save_data(extracted_data_list) -> str | None:
     if not extracted_data_list:
         return None
-
-    project_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-    outputs_dir = os.path.join(project_root, "outputs")
-    os.makedirs(outputs_dir, exist_ok=True)
-
-    filename = "output_beta2.csv"
-    output_file = os.path.join(outputs_dir, filename)
-
     # Convertir la nouvelle data en DataFrame
     new_df = pd.DataFrame(extracted_data_list)
 
-    if os.path.isfile(output_file):
+    if os.path.isfile(file_path):
         # Charger l'ancien fichier
-        old_df = pd.read_csv(output_file, encoding="utf-8")
+        old_df = pd.read_csv(file_path, encoding="utf-8")
 
         # Concaténer et réaligner les colonnes (remplit NaN pour colonnes manquantes)
         combined_df = pd.concat([old_df, new_df], ignore_index=True)
 
         # Réécrire le fichier complet avec nouveau header
-        combined_df.to_csv(output_file, index=False, encoding="utf-8")
+        combined_df.to_csv(file_path, index=False, encoding="utf-8")
     else:
         # Première écriture
-        new_df.to_csv(output_file, index=False, encoding="utf-8")
-
-    return output_file
+        new_df.to_csv(file_path, index=False, encoding="utf-8")
+    return file_path
 
 
 def get_main_data(page: Page):
@@ -100,7 +72,11 @@ def get_main_data(page: Page):
         if (
             title_c
             and value_c
-            and ("School" in title_c)
+            and (
+                ("School" in title_c)
+                or ("High" in title_c)
+                or ("Elementary" in title_c)
+            )
             and (title_c != "School District")
         ):
             data["Schools"] = (
@@ -113,33 +89,39 @@ def get_main_data(page: Page):
     #
     # Table
     #
-    table = page.locator("div.px-5.py-4 table.text-right.w-full")
-    headers = table.locator("thead tr th")
-    header_texts = [
-        headers.nth(i).inner_text().strip().replace("\n", " ")
-        for i in range(4)  # headers.count())
-    ]
-    print("headers texte : ", header_texts)
-    rows = table.locator("tbody tr")
+    try:
+        table = page.locator("div.px-5.py-4 table.text-right.w-full")
+        headers = table.locator("thead tr th")
+        header_texts = [
+            headers.nth(i).inner_text().strip().replace("\n", " ")
+            for i in range(4)  # headers.count())
+        ]
+        print("headers texte : ", header_texts)
+        rows = table.locator("tbody tr")
 
-    for i in range(3):  # rows.count()):
-        row = rows.nth(i)
-        cells = row.locator("td")
-        print(f"Row {i} -- cells {len(cells.all())}")
-        row_title = cells.nth(0).inner_text().strip()
-        for j in range(1, cells.count()):
-            key = f"Buildable SF {row_title} {header_texts[j]}"
-            value = cells.nth(j).inner_text().strip()
-            data[key] = value
+        for i in range(3):  # rows.count()):
+            row = rows.nth(i)
+            cells = row.locator("td")
+            print(f"Row {i} -- cells {len(cells.all())}")
+            row_title = cells.nth(0).inner_text().strip()
+            for j in range(1, 4):  # cells.count()):
+                key = f"Buildable SF {row_title} {header_texts[j]}"
+                value = cells.nth(j).inner_text().strip()
+                data[key] = value
+    except Exception as e:
+        print(f"Errorr getting table : {e}")
 
     return data
 
 
 def get_all_properties(page: Page):
     property_lst = []  # ["https://www.rel.network/property/1005930036", "https://www.rel.network/property/1017540155"]
-    next_btn = page.locator("div.inline-block.py-1.px-3 ", has_text="›")
+    next_btn = page.locator("button[title='Next page']", has_text="Next")
+    next_disabled = next_btn.first.get_attribute("disabled")
+    print(f"Next Disabled : {next_disabled}")
     i = 0
-    while next_btn:
+    # page.pause()
+    while not next_disabled:
         print("Got Next Btn")
         next_btn = None
         page.wait_for_selector("div.truncate > a")
@@ -149,7 +131,8 @@ def get_all_properties(page: Page):
             link = pr.get_attribute("href")
             property_lst.append(f"https://www.rel.network{link}")
         try:
-            next_btn = page.locator("div.inline-block.py-1.px-3 ", has_text="›")
+            next_btn = page.locator("button[title='Next page']", has_text="Next")
+            next_disabled = next_btn.first.get_attribute("disabled")
             if next_btn:
                 next_btn.first.click()
                 i += 1
@@ -160,6 +143,7 @@ def get_all_properties(page: Page):
 
 
 def run(headless: bool):
+    os.makedirs(outputs_dir, exist_ok=True)
     with sync_playwright() as p:
         try:
             main_url = "https://www.rel.network/account/my-lists"
@@ -170,21 +154,20 @@ def run(headless: bool):
             page.wait_for_load_state("load", timeout=TIMEOUT)
             final_list = []
             property_lst = get_all_properties(page)
-            # [
-            #     "https://www.rel.network/property/3003660041"
-            # ]
+            already_done_links = get_existing_property_links()
             #
             # For each Property
             #
-            for index,p in enumerate(property_lst):
-                print(f"Scraping link {index+1} / {len(property_lst)}")
-                if has_property_link(p):
+            for index, p in enumerate(property_lst):
+                print(f"Scraping link {index + 1} / {len(property_lst)}")
+                if p in already_done_links:
+                    print("deja fait ")
                     continue
                 try:
                     page.goto(p, timeout=TIMEOUT)
                     page.wait_for_load_state("load", timeout=TIMEOUT)
                 except Exception as e:
-                    print("Unable to load")
+                    print(f"Unable to load {e}")
                     continue
                 #
                 # Common Data from the first page
@@ -192,12 +175,16 @@ def run(headless: bool):
                     common_data = get_main_data(page)
                     common_data["Property Link"] = p
                 except Exception as e:
+                    print(f"Unable to get_main_data {e}")
                     continue
                 # print(f"Common data : {common_data}")
                 span = page.locator("nav[aria-label='Tabs'] span", has_text="Ownership")
                 # Ownership Button
                 if span.count() < 0:
-                    return []
+                    print("No Ownership Btn")
+                    save_data([common_data.copy()])
+                    final_list.append(common_data.copy())
+                    continue
                 print("Got Ownership Btn")
                 span.first.click()
                 print("Clicked")
@@ -211,6 +198,10 @@ def run(headless: bool):
                 rows = page.query_selector_all(
                     "div.flex.flex-col.flex-grow.h-full > div.grid.grid-flow-col"
                 )
+                if len(rows) == 0:
+                    save_data([common_data.copy()])
+                    final_list.append(common_data.copy())
+                    continue
                 print(f"Got {len(rows)} Ownership Rows !")
                 for row in rows[1:]:
                     cols = row.query_selector_all("> div")
