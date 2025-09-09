@@ -267,6 +267,6 @@ def run(url: str, headless: bool):
 
 if __name__ == "__main__":
     # making_inputs("https://www.rel.network/account/my-lists", False)
-    # run("https://www.rel.network/account/my-lists", False)
-    ok = load_already_processed()
-    print(ok)
+    run("https://www.rel.network/account/my-lists", False)
+    # ok = load_already_processed()
+    # print(ok)
