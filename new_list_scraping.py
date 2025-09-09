@@ -39,7 +39,7 @@ def save_data(extracted_data_list) -> str | None:
     outputs_dir = os.path.join(project_root, "outputs")
     os.makedirs(outputs_dir, exist_ok=True)
     # filename = f"willsburg_output_{uid}.csv"
-    output_file = os.path.join(outputs_dir, OUTPUT_FILE)
+    output_file = OUTPUT_FILE # os.path.join(outputs_dir, OUTPUT_FILE)
     if not extracted_data_list:
         return None
     df = pd.DataFrame(extracted_data_list)
@@ -252,7 +252,7 @@ def run(url: str, headless: bool):
                     )
                     with open("log.txt", "a+") as f:
                         f.write(
-                            f" ------------ Saved {ir + 1} / {len(rows[1:])} --  {ip + 1} / {len(new_links)} Property"
+                            f" ------------ Saved {ir + 1} / {len(rows[1:])} --  {ip + 1} / {len(new_links)} Property\n"
                         )
 
                 with open(ALREADY_DONE, "a+") as f:
