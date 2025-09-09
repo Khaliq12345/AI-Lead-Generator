@@ -181,7 +181,7 @@ def run(url: str, headless: bool):
             print("Liens déjà traités :", len(already_done))
 
             new_links = [link for link in all_links if link not in already_done]
-            print("Nouveaux liens à traiter :", new_links)
+            print("Nouveaux liens à traiter :", len(new_links))
             #
             # For each Property
             #
@@ -256,7 +256,7 @@ def run(url: str, headless: bool):
                         )
 
                 with open(ALREADY_DONE, "a+") as f:
-                    f.write(p)
+                    f.write(f"{p}\n")
 
             print("Process ended !!!")
             context.storage_state(path="rel.json")
@@ -267,5 +267,6 @@ def run(url: str, headless: bool):
 
 if __name__ == "__main__":
     # making_inputs("https://www.rel.network/account/my-lists", False)
-    run("https://www.rel.network/account/my-lists", False)
-    # load_already_processed()
+    # run("https://www.rel.network/account/my-lists", False)
+    ok = load_already_processed()
+    print(ok)

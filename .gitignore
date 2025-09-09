@@ -10,3 +10,5 @@ output*.*
 old*.*
 will*.*
 inputs.csv
+log.txt
+already.txt
